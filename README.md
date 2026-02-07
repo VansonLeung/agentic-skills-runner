@@ -1,4 +1,4 @@
-# LLM Skills Runner
+# Agentic Skills Runner
 
 A lightweight Python toolkit for OpenAI-compatible LLM APIs with Skills-based tool execution.
 
