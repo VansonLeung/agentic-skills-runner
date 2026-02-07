@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+
+# Packaging/build
+build/
+dist/
+
+# Environment
+.env
+.env.*
+
+# Test artifacts
+.pytest_cache/
+
+# Logs
+*.log
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp files
+*.tmp
+*.swp

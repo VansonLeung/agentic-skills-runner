@@ -140,4 +140,4 @@ Type 'exit' to quit
 You: What skills do I have?
 
 🔧 Tool: list_skills()
-🔧 Result: {" skills": ["calculator"]}
+🔧 Result: {"skills": ["calculator"]}

@@ -26,14 +26,14 @@
 
 **Purpose**: Initialize project structure, dependencies, and tooling
 
-- [ ] T001 Create Python project structure per plan.md (src/skills_runner/, tests/)
-- [ ] T002 Create pyproject.toml with metadata (name, version, Python 3.9+ requirement)
-- [ ] T003 [P] Create .gitignore (venv/, .env, __pycache__, *.pyc, .pytest_cache/, dist/)
-- [ ] T004 [P] Create README.md with project overview and quickstart instructions
-- [ ] T005 [P] Create requirements.txt with core dependencies (requests, click, python-dotenv)
-- [ ] T006 [P] Create requirements-dev.txt with test dependencies (pytest, pytest-mock, pytest-asyncio)
-- [ ] T007 [P] Configure pytest in pyproject.toml (test paths, markers, coverage)
-- [ ] T008 Create src/skills_runner/__init__.py with version and public API exports
+- [x] T001 Create Python project structure per plan.md (src/skills_runner/, tests/)
+- [x] T002 Create pyproject.toml with metadata (name, version, Python 3.9+ requirement)
+- [x] T003 [P] Create .gitignore (venv/, .env, __pycache__, *.pyc, .pytest_cache/, dist/)
+- [x] T004 [P] Create README.md with project overview and quickstart instructions
+- [x] T005 [P] Create requirements.txt with core dependencies (requests, click, python-dotenv)
+- [x] T006 [P] Create requirements-dev.txt with test dependencies (pytest, pytest-mock, pytest-asyncio)
+- [x] T007 [P] Configure pytest in pyproject.toml (test paths, markers, coverage)
+- [x] T008 Create src/skills_runner/__init__.py with version and public API exports
 
 **Checkpoint**: Project structure ready for foundational module implementation
 
@@ -45,11 +45,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T009 [P] Implement Configuration class in src/skills_runner/config.py (load env vars, validate API credentials)
-- [ ] T010 [P] Create unit tests for Configuration in tests/unit/test_config.py
-- [ ] T011 [P] Create base error classes in src/skills_runner/exceptions.py (SkillsRunnerError, ConfigError, SkillNotFoundError, ToolExecutionError)
-- [ ] T012 [P] Create skills folder validator in src/skills_runner/config.py (check path exists, create if missing)
-- [ ] T013 Create .env.example with all required environment variables (LLM_API_KEY, LLM_API_BASE_URL, LLM_MODEL_NAME, SKILLS_FOLDER_PATH, SCRIPT_TIMEOUT_SECONDS)
+- [x] T009 [P] Implement Configuration class in src/skills_runner/config.py (load env vars, validate API credentials)
+- [x] T010 [P] Create unit tests for Configuration in tests/unit/test_config.py
+- [x] T011 [P] Create base error classes in src/skills_runner/exceptions.py (SkillsRunnerError, ConfigError, SkillNotFoundError, ToolExecutionError)
+- [x] T012 [P] Create skills folder validator in src/skills_runner/config.py (check path exists, create if missing)
+- [x] T013 Create .env.example with all required environment variables (LLM_API_KEY, LLM_API_BASE_URL, LLM_MODEL_NAME, SKILLS_FOLDER_PATH, SCRIPT_TIMEOUT_SECONDS)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -63,18 +63,18 @@
 
 ### Contract Tests for User Story 1
 
-- [ ] T014 [P] [US1] Create contract test for LLM API request/response in tests/contract/test_llm_client.py
-- [ ] T015 [P] [US1] Create integration test for basic conversation flow in tests/integration/test_conversation.py
+- [x] T014 [P] [US1] Create contract test for LLM API request/response in tests/contract/test_llm_client.py
+- [x] T015 [P] [US1] Create integration test for basic conversation flow in tests/integration/test_conversation.py
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Implement LLMClient class in src/skills_runner/llm_client.py (OpenAI-compatible API calls)
-- [ ] T017 [P] [US1] Implement Message class in src/skills_runner/models.py (role, content, tool_calls, tool_call_id)
-- [ ] T018 [US1] Implement Conversation class in src/skills_runner/conversation.py (message history, send_to_llm method)
-- [ ] T019 [US1] Implement basic CLI command in src/skills_runner/cli.py (chat command accepting prompt)
-- [ ] T020 [US1] Add error handling for API failures in src/skills_runner/llm_client.py (timeout, auth errors, network issues)
-- [ ] T021 [P] [US1] Create unit tests for LLMClient in tests/unit/test_llm_client.py
-- [ ] T022 [P] [US1] Create unit tests for Conversation in tests/unit/test_conversation.py
+- [x] T016 [P] [US1] Implement LLMClient class in src/skills_runner/llm_client.py (OpenAI-compatible API calls)
+- [x] T017 [P] [US1] Implement Message class in src/skills_runner/models.py (role, content, tool_calls, tool_call_id)
+- [x] T018 [US1] Implement Conversation class in src/skills_runner/conversation.py (message history, send_to_llm method)
+- [x] T019 [US1] Implement basic CLI command in src/skills_runner/cli.py (chat command accepting prompt)
+- [x] T020 [US1] Add error handling for API failures in src/skills_runner/llm_client.py (timeout, auth errors, network issues)
+- [x] T021 [P] [US1] Create unit tests for LLMClient in tests/unit/test_llm_client.py
+- [x] T022 [P] [US1] Create unit tests for Conversation in tests/unit/test_conversation.py
 
 **Checkpoint**: User Story 1 complete - can make LLM API calls and receive responses
 
@@ -88,26 +88,26 @@
 
 ### Contract Tests for User Story 2
 
-- [ ] T023 [P] [US2] Create contract test for LIST_SKILLS in tests/contract/test_list_skills.py
-- [ ] T024 [P] [US2] Create contract test for GET_SKILL in tests/contract/test_get_skill.py
-- [ ] T025 [P] [US2] Create contract test for READ_FILE_IN_SKILL in tests/contract/test_read_file_in_skill.py
-- [ ] T026 [P] [US2] Create integration test for skills discovery flow in tests/integration/test_skills_discovery.py
+- [x] T023 [P] [US2] Create contract test for LIST_SKILLS in tests/contract/test_list_skills.py
+- [x] T024 [P] [US2] Create contract test for GET_SKILL in tests/contract/test_get_skill.py
+- [x] T025 [P] [US2] Create contract test for READ_FILE_IN_SKILL in tests/contract/test_read_file_in_skill.py
+- [x] T026 [P] [US2] Create integration test for skills discovery flow in tests/integration/test_skills_discovery.py
 
 ### Implementation for User Story 2
 
-- [ ] T027 [P] [US2] Implement Skill class in src/skills_runner/models.py (name, folder_path, documentation_path, venv_path)
-- [ ] T028 [P] [US2] Implement list_skills function in src/skills_runner/skills_tool.py (scan skills folder, return skill names)
-- [ ] T029 [P] [US2] Implement get_skill function in src/skills_runner/skills_tool.py (read SKILL.MD for specified skill)
-- [ ] T030 [P] [US2] Implement read_file_in_skill function in src/skills_runner/skills_tool.py (read file with path traversal protection)
-- [ ] T031 [US2] Create ToolDefinition constants in src/skills_runner/tools.py (4 tool schemas: list_skills, get_skill, read_file_in_skill, run_python_script)
-- [ ] T032 [US2] Integrate tools with Conversation class in src/skills_runner/conversation.py (register tools, execute tool calls, return results)
-- [ ] T033 [US2] Add tool execution visibility in src/skills_runner/conversation.py (display tool calls and results to user)
-- [ ] T034 [US2] Add skill name validation in src/skills_runner/skills_tool.py (reject /, \, .. characters)
-- [ ] T035 [US2] Add error handling for missing skills/files in src/skills_runner/skills_tool.py
-- [ ] T036 [P] [US2] Create unit tests for Skill model in tests/unit/test_models.py
-- [ ] T037 [P] [US2] Create unit tests for list_skills in tests/unit/test_skills_tool.py
-- [ ] T038 [P] [US2] Create unit tests for get_skill in tests/unit/test_skills_tool.py
-- [ ] T039 [P] [US2] Create unit tests for read_file_in_skill in tests/unit/test_skills_tool.py
+- [x] T027 [P] [US2] Implement Skill class in src/skills_runner/models.py (name, folder_path, documentation_path, venv_path)
+- [x] T028 [P] [US2] Implement list_skills function in src/skills_runner/skills_tool.py (scan skills folder, return skill names)
+- [x] T029 [P] [US2] Implement get_skill function in src/skills_runner/skills_tool.py (read SKILL.MD for specified skill)
+- [x] T030 [P] [US2] Implement read_file_in_skill function in src/skills_runner/skills_tool.py (read file with path traversal protection)
+- [x] T031 [US2] Create ToolDefinition constants in src/skills_runner/tools.py (4 tool schemas: list_skills, get_skill, read_file_in_skill, run_python_script)
+- [x] T032 [US2] Integrate tools with Conversation class in src/skills_runner/conversation.py (register tools, execute tool calls, return results)
+- [x] T033 [US2] Add tool execution visibility in src/skills_runner/conversation.py (display tool calls and results to user)
+- [x] T034 [US2] Add skill name validation in src/skills_runner/skills_tool.py (reject /, \, .. characters)
+- [x] T035 [US2] Add error handling for missing skills/files in src/skills_runner/skills_tool.py
+- [x] T036 [P] [US2] Create unit tests for Skill model in tests/unit/test_models.py
+- [x] T037 [P] [US2] Create unit tests for list_skills in tests/unit/test_skills_tool.py
+- [x] T038 [P] [US2] Create unit tests for get_skill in tests/unit/test_skills_tool.py
+- [x] T039 [P] [US2] Create unit tests for read_file_in_skill in tests/unit/test_skills_tool.py
 
 **Checkpoint**: User Story 2 complete - LLM can discover and read skills autonomously
 
@@ -121,22 +121,22 @@
 
 ### Contract Tests for User Story 3
 
-- [ ] T040 [P] [US3] Create contract test for RUN_PYTHON_SCRIPT in tests/contract/test_run_python_script.py
-- [ ] T041 [P] [US3] Create integration test for script execution flow in tests/integration/test_script_execution.py
+- [x] T040 [P] [US3] Create contract test for RUN_PYTHON_SCRIPT in tests/contract/test_run_python_script.py
+- [x] T041 [P] [US3] Create integration test for script execution flow in tests/integration/test_script_execution.py
 
 ### Implementation for User Story 3
 
-- [ ] T042 [P] [US3] Implement ScriptExecution class in src/skills_runner/models.py (skill_name, script, stdout, stderr, returncode, timed_out)
-- [ ] T043 [P] [US3] Implement venv detection in src/skills_runner/executor.py (find Python interpreter in skill venv)
-- [ ] T044 [US3] Implement run_python_script function in src/skills_runner/skills_tool.py (execute via subprocess with timeout)
-- [ ] T045 [US3] Add working directory setup in src/skills_runner/executor.py (set cwd to skill folder)
-- [ ] T046 [US3] Add timeout handling in src/skills_runner/executor.py (default 30s, capture partial output on timeout)
-- [ ] T047 [US3] Add stdout/stderr capture in src/skills_runner/executor.py (capture_output=True, text=True)
-- [ ] T048 [US3] Add error handling for missing venv in src/skills_runner/skills_tool.py (clear error message if no venv)
-- [ ] T049 [US3] Integrate RUN_PYTHON_SCRIPT with Conversation in src/skills_runner/conversation.py (execute when LLM calls tool)
-- [ ] T050 [P] [US3] Create unit tests for ScriptExecution model in tests/unit/test_models.py
-- [ ] T051 [P] [US3] Create unit tests for executor in tests/unit/test_executor.py
-- [ ] T052 [P] [US3] Create unit tests for run_python_script in tests/unit/test_skills_tool.py
+- [x] T042 [P] [US3] Implement ScriptExecution class in src/skills_runner/models.py (skill_name, script, stdout, stderr, returncode, timed_out)
+- [x] T043 [P] [US3] Implement venv detection in src/skills_runner/executor.py (find Python interpreter in skill venv)
+- [x] T044 [US3] Implement run_python_script function in src/skills_runner/skills_tool.py (execute via subprocess with timeout)
+- [x] T045 [US3] Add working directory setup in src/skills_runner/executor.py (set cwd to skill folder)
+- [x] T046 [US3] Add timeout handling in src/skills_runner/executor.py (default 30s, capture partial output on timeout)
+- [x] T047 [US3] Add stdout/stderr capture in src/skills_runner/executor.py (capture_output=True, text=True)
+- [x] T048 [US3] Add error handling for missing venv in src/skills_runner/skills_tool.py (clear error message if no venv)
+- [x] T049 [US3] Integrate RUN_PYTHON_SCRIPT with Conversation in src/skills_runner/conversation.py (execute when LLM calls tool)
+- [x] T050 [P] [US3] Create unit tests for ScriptExecution model in tests/unit/test_models.py
+- [x] T051 [P] [US3] Create unit tests for executor in tests/unit/test_executor.py
+- [x] T052 [P] [US3] Create unit tests for run_python_script in tests/unit/test_skills_tool.py
 
 **Checkpoint**: All 3 user stories complete - full MVP functionality ready
 
@@ -146,20 +146,20 @@
 
 **Purpose**: Improvements affecting multiple user stories, documentation, and final validation
 
-- [ ] T053 [P] Add library usage examples in README.md (import, configure, call LLM)
-- [ ] T054 [P] Add CLI usage examples in README.md (skills-runner chat command)
-- [ ] T055 [P] Create example .env file with placeholder credentials in .env.example
-- [ ] T056 [P] Create example skill structure in examples/calculator/ (SKILL.MD, examples/, venv/)
-- [ ] T057 [P] Update pyproject.toml with entry points for CLI (skills-runner = skills_runner.cli:main)
-- [ ] T058 Add type hints validation across all modules (mypy --strict compatibility)
-- [ ] T059 Add docstrings to all public APIs (classes, functions, modules)
-- [ ] T060 Run quickstart.md validation per quickstart guide test scenarios
-- [ ] T061 [P] Add performance logging for tool operations (list_skills, get_skill, read_file_in_skill, run_python_script)
-- [ ] T062 [P] Create CONTRIBUTING.md with development setup and testing guidelines
-- [ ] T063 Code cleanup and refactoring (remove dead code, improve naming)
-- [ ] T064 Performance optimization if targets not met (SC-004, SC-005, SC-006)
-- [ ] T065 Security audit of path validation and subprocess execution
-- [ ] T066 [P] Add logging configuration in src/skills_runner/config.py (optional logging to file)
+- [x] T053 [P] Add library usage examples in README.md (import, configure, call LLM)
+- [x] T054 [P] Add CLI usage examples in README.md (skills-runner chat command)
+- [x] T055 [P] Create example .env file with placeholder credentials in .env.example
+- [x] T056 [P] Create example skill structure in examples/calculator/ (SKILL.MD, examples/, venv/)
+- [x] T057 [P] Update pyproject.toml with entry points for CLI (skills-runner = skills_runner.cli:main)
+- [x] T058 Add type hints validation across all modules (mypy --strict compatibility)
+- [x] T059 Add docstrings to all public APIs (classes, functions, modules)
+- [x] T060 Run quickstart.md validation per quickstart guide test scenarios
+- [x] T061 [P] Add performance logging for tool operations (list_skills, get_skill, read_file_in_skill, run_python_script)
+- [x] T062 [P] Create CONTRIBUTING.md with development setup and testing guidelines
+- [x] T063 Code cleanup and refactoring (remove dead code, improve naming)
+- [x] T064 Performance optimization if targets not met (SC-004, SC-005, SC-006) - Not needed: All performance targets met
+- [x] T065 Security audit of path validation and subprocess execution
+- [x] T066 [P] Add logging configuration in src/skills_runner/config.py (optional logging to file)
 
 ---
 

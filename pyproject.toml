@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skills-runner"
+version = "0.1.0"
+description = "LLM skills runner toolkit"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Agentic Skills Runner" }
+]
+dependencies = [
+  "requests>=2.31.0",
+  "click>=8.1.7",
+  "python-dotenv>=1.0.1"
+]
+
+[project.scripts]
+skills-runner = "skills_runner.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+  "contract",
+  "integration",
+  "unit"
+]
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+strict_equality = true
