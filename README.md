@@ -110,3 +110,4 @@ curl http://localhost:8000/v1/chat/completions \
 Learn how to create your own SKILLS to extend the LLM's capabilities:
 
 - **[SKILLS Guide](SKILLS_GUIDE.md)**: Complete tutorial on creating custom SKILLS with examples and best practices
+- **[Example SKILLS](example_skills/)**: Study the `calculator` and `web_browser` example SKILLS to understand the structure and patterns
