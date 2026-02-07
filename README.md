@@ -104,3 +104,9 @@ curl http://localhost:8000/v1/chat/completions \
 - MVP scripts run with full filesystem access; users must trust skill code and generated scripts.
 - Skill name and file path validation prevents directory traversal for read tools.
 - No sandboxing or resource isolation is enforced in MVP (post-MVP enhancement).
+
+## Extending with Custom SKILLS
+
+Learn how to create your own SKILLS to extend the LLM's capabilities:
+
+- **[SKILLS Guide](SKILLS_GUIDE.md)**: Complete tutorial on creating custom SKILLS with examples and best practices
