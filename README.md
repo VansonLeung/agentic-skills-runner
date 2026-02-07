@@ -111,3 +111,12 @@ Learn how to create your own SKILLS to extend the LLM's capabilities:
 
 - **[SKILLS Guide](SKILLS_GUIDE.md)**: Complete tutorial on creating custom SKILLS with examples and best practices
 - **[Example SKILLS](example_skills/)**: Study the `calculator` and `web_browser` example SKILLS to understand the structure and patterns
+
+
+## My remarks
+
+I have been dabbling the core foundation of Claude Code Skills and made my own Skills runner. I can now download and install agent skills and use them with my locally hosted LLMs' chat API endpoint - while not paying 1 cent to Claude Code. hashtag#agentic
+
+That said, it still blows my mind how simple and how useful it is to use agent skills. I believe Anthropic is going to beat OpenAI really really hard. There must be full of geniuses in Anthropic. If Anthropic goes public someday, I will deposit all my money in it.
+
+localhost coder LLMs finally deserve some recognitions.
