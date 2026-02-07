@@ -24,6 +24,12 @@ Start a chat session:
 python -m skills_runner chat "What skills are available?"
 ```
 
+Start the API server:
+
+```bash
+uvicorn skills_runner.api:app --reload
+```
+
 ## Library Usage
 
 ```python
@@ -60,6 +66,31 @@ skills-runner chat
 Single-shot mode:
 ```bash
 skills-runner chat "List my skills"
+```
+
+## API Usage
+
+OpenAI-compatible chat endpoint:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "gpt-4",
+        "messages": [{"role": "user", "content": "What skills are available?"}]
+    }'
+```
+
+Streaming response:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "gpt-4",
+        "stream": true,
+        "messages": [{"role": "user", "content": "What skills are available?"}]
+    }'
 ```
 
 ## Security Considerations

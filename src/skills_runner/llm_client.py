@@ -27,6 +27,8 @@ class LLMClient:
             "tools": tools,
             "tool_choice": "auto",
         }
+        
+        print(payload)
 
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=self.timeout_seconds)

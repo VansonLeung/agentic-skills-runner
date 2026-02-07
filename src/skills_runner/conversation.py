@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from pathlib import Path
 import json
 
@@ -20,17 +20,62 @@ class Conversation:
             Message(
                 role="system",
                 content=(
-                    "You are a helpful assistant with access to tools. "
-                    "Before using any skill name, call list_skills to discover available skills. "
+                    "Before you think you cannot assist the user in doing something, e.g. access external websites, "
+                    "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
+                    "Before using any skill name, call \"list_skills\" to discover available skills. "
                     "Do not guess skill names."
                 ),
             )
         ]
 
-    def send(self, user_input: str) -> str:
+    def load_messages(self, messages: List[Dict[str, Any]]) -> None:
+        """Replace the conversation history with OpenAI-format messages."""
+        has_system = any(message.get("role") == "system" for message in messages)
+        self.messages = []
+        if not has_system:
+            self.messages.append(
+                Message(
+                    role="system",
+                    content=(
+                        "Before you think you cannot assist the user in doing something, e.g. access external websites, "
+                        "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
+                        "Before using any skill name, call \"list_skills\" to discover available skills. "
+                        "Do not guess skill names."
+                    ),
+                )
+            )
+
+        for message in messages:
+            if not isinstance(message, dict):
+                continue
+            self.messages.append(
+                Message(
+                    role=message.get("role", "user"),
+                    content=message.get("content"),
+                    tool_calls=message.get("tool_calls"),
+                    tool_call_id=message.get("tool_call_id"),
+                    name=message.get("name"),
+                )
+            )
+
+    def send(
+        self,
+        user_input: str,
+        tool_event_handler: Optional[
+            Callable[[str, Dict[str, Any], Optional[Dict[str, Any]]], None]
+        ] = None,
+    ) -> str:
         """Send user input to the LLM and return the final assistant response."""
         self.messages.append(Message(role="user", content=user_input))
+        return self.run(tool_event_handler=tool_event_handler)
 
+    def run(
+        self,
+        tool_event_handler: Optional[
+            Callable[[str, Dict[str, Any], Optional[Dict[str, Any]]], None]
+        ] = None,
+    ) -> str:
+        """Run a conversation turn using the current message history."""
         while True:
             response_message = self.client.chat(self._serialize_messages(), self.tools)
             tool_calls = response_message.get("tool_calls")
@@ -42,8 +87,13 @@ class Conversation:
 
             if tool_calls:
                 for tool_call in tool_calls:
+                    if tool_event_handler:
+                        tool_event_handler("start", tool_call, None)
                     result = self._execute_tool(tool_call)
-                    self._display_tool_event(tool_call, result)
+                    if tool_event_handler:
+                        tool_event_handler("end", tool_call, result)
+                    else:
+                        self._display_tool_event(tool_call, result)
                     self.messages.append(
                         Message(
                             role="tool",
