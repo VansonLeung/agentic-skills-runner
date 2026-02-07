@@ -152,78 +152,224 @@ examples/
 
 3. **Verify Dependencies**: Ensure all required packages are listed in `requirements.txt`
 
-## Example: File Reader SKILL
+## Real-World Examples
 
-Here's a complete example of a simple file reading skill:
+Here are complete examples from the actual SKILLS included in this project:
 
-### SKILLS/file_reader/SKILL.md
+### Example 1: Calculator SKILL
+
+The Calculator SKILL demonstrates a simple skill that performs mathematical operations.
+
+#### SKILLS/calculator/SKILL.md
 ```markdown
-# File Reader Skill
+# Calculator Skill
 
 ## Description
-This skill allows you to read and analyze text files from the filesystem. It can extract content, search for patterns, and provide file information.
+This skill lets you perform simple mathematical calculations, such as addition, subtraction, multiplication, and division. The LLM should write and execute Python code to compute results accurately.
 
 ## Key Principles
-- Only read files that are explicitly requested
-- Handle file not found and permission errors gracefully
-- Respect file encodings and use UTF-8 as default
-- Limit output to reasonable sizes to avoid overwhelming responses
+- Always use Python's built-in operators for calculations.
+- Handle basic arithmetic operations.
+- Output the result clearly, e.g., using `print()`.
 
 ## Examples
 
-### Example 1: Read Entire File
-**User Query:** Read the contents of myfile.txt
+### Example 1: Addition
+**User Query:** What is 5 + 7?
 
 **Response Plan:**
-1. Check if file exists and is readable
-2. Read the entire file content
-3. Display the content with line numbers
+1. Write a Python script to add the numbers.
+2. Execute the script and return the result.
 
 **Python Code:**
 ```python
-import os
-
-filename = "myfile.txt"
-
-if os.path.exists(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        content = f.read()
-        lines = content.split('\n')
-        for i, line in enumerate(lines, 1):
-            print(f"{i:3}: {line}")
-else:
-    print(f"File '{filename}' not found.")
+print(5 + 7)
 ```
 
-### Example 2: Search for Text
-**User Query:** Find all lines containing "error" in log.txt
+### Example 2: Subtraction
+**User Query:** What is 10 - 3?
 
 **Response Plan:**
-1. Read the file line by line
-2. Search for the specified text (case-insensitive)
-3. Display matching lines with context
+1. Write a Python script to subtract the numbers.
+2. Execute the script and return the result.
 
 **Python Code:**
 ```python
-import re
+print(10 - 3)
+```
 
-filename = "log.txt"
-search_term = "error"
+### Example 3: Multiplication
+**User Query:** What is 6 * 4?
 
-if os.path.exists(filename):
-    with open(filename, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        for i, line in enumerate(lines, 1):
-            if search_term.lower() in line.lower():
-                print(f"Line {i}: {line.strip()}")
+**Response Plan:**
+1. Write a Python script to multiply the numbers.
+2. Execute the script and return the result.
+
+**Python Code:**
+```python
+print(6 * 4)
+```
+
+### Example 4: Division
+**User Query:** What is 15 / 3?
+
+**Response Plan:**
+1. Write a Python script to divide the numbers.
+2. Execute the script and return the result.
+
+**Python Code:**
+```python
+print(15 / 3)
+```
+
+### Example 5: Complex Expression
+**User Query:** What is (2 + 3) * 4 - 5?
+
+**Response Plan:**
+1. Write a Python script to evaluate the expression.
+2. Execute the script and return the result.
+
+**Python Code:**
+```python
+print((2 + 3) * 4 - 5)
+```
+```
+
+#### SKILLS/calculator/requirements.txt
+```
+# No external dependencies needed for basic calculations
+```
+
+### Example 2: Web Browser SKILL
+
+The Web Browser SKILL shows a more complex skill that requires external dependencies and handles web scraping.
+
+#### SKILLS/web_browser/SKILL.md
+```markdown
+# Web Browser Skill
+
+## Description
+This skill enables browsing and extracting information from any website. It provides tools to navigate web pages, search for content, and retrieve specific information from websites using web scraping techniques.
+
+## Key Principles
+- Always respect website terms of service and robots.txt
+- Use reasonable delays between requests to avoid overloading servers
+- Handle both static and dynamic content appropriately
+- Focus on extracting publicly available information
+- Use proper error handling for network issues and parsing failures
+
+## Capabilities
+
+### Web Navigation
+- Visit and load web pages from any URL
+- Handle HTTP redirects and status codes
+- Support for custom headers and timeouts
+- Basic authentication support if needed
+
+### Content Extraction
+- Extract page titles, meta descriptions, and headings
+- Parse HTML content using CSS selectors
+- Extract text content, links, and structured data
+- Handle different content types (HTML, JSON, etc.)
+
+### Search and Discovery
+- Search for specific text within page content
+- Extract elements by CSS selectors or XPath
+- Find links, images, and other page elements
+- Navigate through paginated content
+
+## Usage
+
+Execute Python scripts that use web scraping libraries to browse and extract information:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+
+# Visit any website
+url = "https://example.com"
+response = requests.get(url)
+
+if response.status_code == 200:
+    soup = BeautifulSoup(response.content, 'html.parser')
+    # Extract relevant information
+    title = soup.find('title').text if soup.find('title') else "No title found"
+    print(f"Page Title: {title}")
 else:
-    print(f"File '{filename}' not found.")
-```
+    print(f"Failed to access {url}: {response.status_code}")
 ```
 
-### SKILLS/file_reader/requirements.txt
+## Python Packages
+
+This skill requires web scraping libraries:
+- requests: For making HTTP requests
+- beautifulsoup4: For HTML parsing and content extraction
+- lxml: Optional XML/HTML parser (faster than standard library)
+
+## Examples
+
+### Example 1: Basic Page Information
+**User Query:** What information can you find on a website?
+
+**Response Plan:**
+1. Visit the specified URL
+2. Extract basic page information (title, description, headings)
+3. Return formatted page summary
+
+**Python Code:** See [examples/get_page_info.py](examples/get_page_info.py)
+
+### Example 2: Content Search
+**User Query:** Search for specific content on a website
+
+**Response Plan:**
+1. Load the webpage content
+2. Search for specified keywords or patterns
+3. Extract and return relevant sections
+
+**Python Code:** See [examples/search_content.py](examples/search_content.py)
+
+### Example 3: Extract Structured Data
+**User Query:** Extract specific elements from a webpage
+
+**Response Plan:**
+1. Parse the HTML content
+2. Use CSS selectors to find specific elements
+3. Return structured data (lists, tables, etc.)
+
+**Python Code:** See [examples/extract_elements.py](examples/extract_elements.py)
+
+### Example 4: Link Discovery
+**User Query:** Find all links on a webpage
+
+**Response Plan:**
+1. Parse the webpage
+2. Extract all anchor tags and their href attributes
+3. Return formatted list of links
+
+**Python Code:** See [examples/find_links.py](examples/find_links.py)
+
+## Notes
+
+- Always respect website terms of service and robots.txt files
+- Use reasonable delays between requests to avoid overloading servers
+- Some websites may block automated requests - handle rate limiting gracefully
+- JavaScript-heavy sites may require additional tools for full content access
+- Consider using user agents that identify as automated tools when appropriate
 ```
-# No external dependencies needed for basic file operations
+
+#### SKILLS/web_browser/requirements.txt
+```
+requests
+beautifulsoup4
+```
+
+#### SKILLS/web_browser/examples/ Structure
+```
+examples/
+├── get_page_info.py
+├── search_content.py
+├── extract_elements.py
+└── find_links.py
 ```
 
 ## Contributing SKILLS
