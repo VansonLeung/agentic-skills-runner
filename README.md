@@ -2,6 +2,12 @@
 
 A lightweight Python toolkit for OpenAI-compatible LLM APIs with Skills-based tool execution.
 
+
+
+https://github.com/user-attachments/assets/73b36255-e050-4777-b734-b5f458b3cd08
+
+
+
 ## Quickstart
 
 ```bash
