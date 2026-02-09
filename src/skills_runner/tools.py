@@ -69,6 +69,35 @@ RUN_PYTHON_SCRIPT_DEF = {
     },
 }
 
+WRITE_FILE_IN_SKILL_DEF = {
+    "type": "function",
+    "function": {
+        "name": "write_file_in_skill",
+        "description": (
+            "Write or create a file within a skill's folder. Use this to add implementation code, "
+            "examples, or config files to a skill. Cannot write into venv or hidden directories."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "skill_name": {
+                    "type": "string",
+                    "description": "Name of the skill (folder name)",
+                },
+                "file_path": {
+                    "type": "string",
+                    "description": "Relative path within skill (e.g., 'store.py', 'examples/demo.py')",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Full file content to write",
+                },
+            },
+            "required": ["skill_name", "file_path", "content"],
+        },
+    },
+}
+
 CREATE_SKILL_DEF = {
     "type": "function",
     "function": {
@@ -99,4 +128,4 @@ CREATE_SKILL_DEF = {
     },
 }
 
-SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]
+SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, WRITE_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]

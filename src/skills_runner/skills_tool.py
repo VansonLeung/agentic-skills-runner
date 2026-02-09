@@ -192,6 +192,53 @@ def run_python_script(
     return payload
 
 
+def write_file_in_skill(
+    skill_name: str,
+    file_path: str,
+    content: str,
+    skills_folder: Path,
+) -> Dict[str, object]:
+    """Write or overwrite a file within a skill folder with path validation."""
+    start_time = time.perf_counter()
+    skills_folder = skills_folder.resolve()
+
+    if not validate_skill_name(skill_name):
+        return {"success": False, "error": "Invalid skill name"}
+
+    if not file_path:
+        return {"success": False, "error": "Invalid file path"}
+
+    # Block writing to venv or hidden directories
+    normalized = file_path.replace("\\", "/")
+    if normalized.startswith("venv/") or "/venv/" in normalized:
+        return {"success": False, "error": "Cannot write into the venv directory"}
+    if any(part.startswith(".") for part in normalized.split("/")):
+        return {"success": False, "error": "Cannot write to hidden directories/files"}
+
+    skill_dir = skills_folder / skill_name
+    if not skill_dir.exists():
+        return {"success": False, "error": f"Skill '{skill_name}' not found"}
+
+    target = (skill_dir / file_path).resolve()
+    if not target.is_relative_to(skill_dir):
+        return {"success": False, "error": "Path traversal detected: cannot write outside skill folder"}
+
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+    except OSError as exc:
+        return {"success": False, "error": f"Failed to write file: {exc}"}
+
+    result: Dict[str, object] = {
+        "success": True,
+        "skill_name": skill_name,
+        "file_path": file_path,
+        "size_bytes": len(content.encode("utf-8")),
+    }
+    _log_duration("write_file_in_skill", start_time)
+    return result
+
+
 def create_skill(
     skill_name: str,
     skill_md_content: str,
