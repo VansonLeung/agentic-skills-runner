@@ -9,6 +9,28 @@ from .llm_client import LLMClient
 from .models import Message
 from .skills_tool import get_skill, list_skills, read_file_in_skill, run_python_script
 
+_FALLBACK_SYSTEM_PROMPT = (
+    "Before you think you cannot assist the user in doing something, e.g. access external websites, "
+    "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
+    "Before using any skill name, call \"list_skills\" to discover available skills. "
+    "Do not guess skill names."
+)
+
+
+def _load_soul_prompt() -> str:
+    """Load the system prompt from soul.md at the project root.
+
+    Searches upward from this file's location for soul.md.
+    Falls back to a minimal hardcoded prompt if not found.
+    """
+    search_dir = Path(__file__).resolve().parent
+    for _ in range(5):
+        candidate = search_dir / "soul.md"
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8").strip()
+        search_dir = search_dir.parent
+    return _FALLBACK_SYSTEM_PROMPT
+
 
 class Conversation:
     """Manage chat history and tool execution loop."""
@@ -17,15 +39,7 @@ class Conversation:
         self.tools = tools
         self.skills_folder = skills_folder
         self.messages: List[Message] = [
-            Message(
-                role="system",
-                content=(
-                    "Before you think you cannot assist the user in doing something, e.g. access external websites, "
-                    "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
-                    "Before using any skill name, call \"list_skills\" to discover available skills. "
-                    "Do not guess skill names."
-                ),
-            )
+            Message(role="system", content=_load_soul_prompt())
         ]
 
     def load_messages(self, messages: List[Dict[str, Any]]) -> None:
@@ -34,15 +48,7 @@ class Conversation:
         self.messages = []
         if not has_system:
             self.messages.append(
-                Message(
-                    role="system",
-                    content=(
-                        "Before you think you cannot assist the user in doing something, e.g. access external websites, "
-                        "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
-                        "Before using any skill name, call \"list_skills\" to discover available skills. "
-                        "Do not guess skill names."
-                    ),
-                )
+                Message(role="system", content=_load_soul_prompt())
             )
 
         for message in messages:
