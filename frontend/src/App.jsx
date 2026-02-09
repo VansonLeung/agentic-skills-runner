@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:8003'
 
 // --- Icons ---
 
@@ -161,6 +161,18 @@ function App() {
     updateActiveMessages((prev) => {
       const next = [...prev]
       if (streamIndexRef.current === null || !next[streamIndexRef.current]) {
+        // Look for the last assistant message after any trailing tool messages
+        // so we continue appending instead of creating a split bubble
+        let lastAssistantIdx = null
+        for (let i = next.length - 1; i >= 0; i--) {
+          if (next[i].role === 'assistant') { lastAssistantIdx = i; break }
+          if (next[i].role === 'user') break
+        }
+        if (lastAssistantIdx !== null) {
+          streamIndexRef.current = lastAssistantIdx
+          next[lastAssistantIdx] = { ...next[lastAssistantIdx], content: `${next[lastAssistantIdx].content}${delta}` }
+          return next
+        }
         next.push({ role: 'assistant', content: delta })
         streamIndexRef.current = next.length - 1
         return next
