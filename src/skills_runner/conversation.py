@@ -7,7 +7,7 @@ import json
 from .exceptions import ToolExecutionError
 from .llm_client import LLMClient
 from .models import Message
-from .skills_tool import get_skill, list_skills, read_file_in_skill, run_python_script
+from .skills_tool import create_skill, get_skill, list_skills, read_file_in_skill, run_python_script
 
 _FALLBACK_SYSTEM_PROMPT = (
     "Before you think you cannot assist the user in doing something, e.g. access external websites, "
@@ -145,6 +145,13 @@ class Conversation:
                 params.get("script", ""),
                 self.skills_folder,
                 self.client.timeout_seconds,
+            )
+        if name == "create_skill":
+            return create_skill(
+                params.get("skill_name", ""),
+                params.get("skill_md_content", ""),
+                params.get("requirements"),
+                self.skills_folder,
             )
 
         return {"error": f"Unknown tool: {name}"}

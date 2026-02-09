@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from .config import Configuration
 from .conversation import Conversation
 from .llm_client import LLMClient
+from .skills_tool import confirm_create_skill
 from .tools import SKILLS_TOOLS
 
 
@@ -167,3 +168,14 @@ def chat_completions(request: ChatCompletionRequest) -> Any:
 
     payload = _build_response(content, model, request_id)
     return JSONResponse(payload)
+
+
+class ConfirmCreateSkillRequest(BaseModel):
+    confirmation_token: str
+
+
+@app.post("/v1/confirm_create_skill")
+def confirm_create_skill_endpoint(request: ConfirmCreateSkillRequest) -> Any:
+    """Execute a pending skill creation after user confirmation."""
+    result = confirm_create_skill(request.confirmation_token)
+    return JSONResponse(result)

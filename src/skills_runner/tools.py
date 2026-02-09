@@ -69,4 +69,34 @@ RUN_PYTHON_SCRIPT_DEF = {
     },
 }
 
-SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF]
+CREATE_SKILL_DEF = {
+    "type": "function",
+    "function": {
+        "name": "create_skill",
+        "description": (
+            "Propose creating a new skill. This will NOT immediately create the skill — "
+            "it returns a preview of actions that require user confirmation before execution. "
+            "Use this when the user asks you to create a new skill."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "skill_name": {
+                    "type": "string",
+                    "description": "Name for the new skill (lowercase_with_underscores, used as folder name)",
+                },
+                "skill_md_content": {
+                    "type": "string",
+                    "description": "Full content for the SKILL.md documentation file",
+                },
+                "requirements": {
+                    "type": "string",
+                    "description": "Contents for requirements.txt (one package per line). Leave empty if no dependencies needed.",
+                },
+            },
+            "required": ["skill_name", "skill_md_content"],
+        },
+    },
+}
+
+SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]

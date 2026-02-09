@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 import logging
+import subprocess
+import sys
 import time
+import uuid
+import venv
 
 from .executor import find_python_executable, run_script
+
+# In-memory store for pending skill creation requests awaiting user confirmation
+_pending_creations: Dict[str, Dict[str, object]] = {}
 
 _logger = logging.getLogger(__name__)
 
@@ -183,3 +190,150 @@ def run_python_script(
 
     _log_duration("run_python_script", start_time)
     return payload
+
+
+def create_skill(
+    skill_name: str,
+    skill_md_content: str,
+    requirements: Optional[str],
+    skills_folder: Path,
+) -> Dict[str, object]:
+    """Propose creating a new skill. Returns a preview requiring user confirmation."""
+    start_time = time.perf_counter()
+    skills_folder = skills_folder.resolve()
+
+    if not validate_skill_name(skill_name):
+        return {
+            "error": (
+                f"Invalid skill name: '{skill_name}'. Skill names must not contain '/', "
+                "'\\', or '..'"
+            )
+        }
+
+    skill_path = skills_folder / skill_name
+    if skill_path.exists():
+        return {"error": f"Skill '{skill_name}' already exists"}
+
+    # Build a preview of what will be created
+    actions: List[str] = [
+        f"Create folder: {skill_path}",
+        f"Write SKILL.md ({len(skill_md_content)} chars)",
+        "Create Python virtual environment (venv)",
+    ]
+    if requirements and requirements.strip():
+        pkgs = [line.strip() for line in requirements.strip().splitlines() if line.strip() and not line.strip().startswith("#")]
+        if pkgs:
+            actions.append(f"pip install: {', '.join(pkgs)}")
+
+    # Store the pending creation with a confirmation token
+    token = uuid.uuid4().hex
+    _pending_creations[token] = {
+        "skill_name": skill_name,
+        "skill_md_content": skill_md_content,
+        "requirements": requirements,
+        "skills_folder": str(skills_folder),
+    }
+
+    result: Dict[str, object] = {
+        "requires_confirmation": True,
+        "confirmation_token": token,
+        "skill_name": skill_name,
+        "preview_actions": actions,
+        "message": "User must approve this action before the skill is created.",
+    }
+    _log_duration("create_skill", start_time)
+    return result
+
+
+def confirm_create_skill(token: str) -> Dict[str, object]:
+    """Execute a previously proposed skill creation after user confirmation."""
+    start_time = time.perf_counter()
+
+    pending = _pending_creations.pop(token, None)
+    if pending is None:
+        return {"error": "Invalid or expired confirmation token"}
+
+    skill_name = str(pending["skill_name"])
+    skill_md_content = str(pending["skill_md_content"])
+    requirements = pending.get("requirements")
+    skills_folder = Path(str(pending["skills_folder"]))
+
+    skill_path = skills_folder / skill_name
+
+    # 1. Create folder
+    try:
+        skill_path.mkdir(parents=True, exist_ok=False)
+    except OSError as exc:
+        return {"error": f"Failed to create skill folder: {exc}"}
+
+    # 2. Write SKILL.md
+    try:
+        (skill_path / "SKILL.md").write_text(skill_md_content, encoding="utf-8")
+    except OSError as exc:
+        return {"error": f"Failed to write SKILL.md: {exc}"}
+
+    # 3. Write requirements.txt (if provided)
+    has_requirements = False
+    if requirements and requirements.strip():
+        try:
+            (skill_path / "requirements.txt").write_text(requirements.strip() + "\n", encoding="utf-8")
+            has_requirements = True
+        except OSError as exc:
+            return {"error": f"Failed to write requirements.txt: {exc}"}
+
+    # 4. Create venv
+    venv_path = skill_path / "venv"
+    try:
+        venv.create(str(venv_path), with_pip=True)
+    except Exception as exc:
+        return {
+            "warning": f"Skill folder created but venv creation failed: {exc}",
+            "skill_name": skill_name,
+            "folder_created": True,
+            "venv_created": False,
+        }
+
+    # 5. pip install requirements
+    pip_output = ""
+    if has_requirements:
+        pip_executable = venv_path / "bin" / "pip"
+        if not pip_executable.exists():
+            pip_executable = venv_path / "Scripts" / "pip.exe"
+
+        if pip_executable.exists():
+            try:
+                proc = subprocess.run(
+                    [str(pip_executable), "install", "-r", str(skill_path / "requirements.txt")],
+                    cwd=str(skill_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+                pip_output = proc.stdout
+                if proc.returncode != 0:
+                    return {
+                        "warning": f"Skill created but pip install failed",
+                        "skill_name": skill_name,
+                        "folder_created": True,
+                        "venv_created": True,
+                        "pip_stderr": proc.stderr,
+                    }
+            except subprocess.TimeoutExpired:
+                return {
+                    "warning": "Skill created but pip install timed out (120s)",
+                    "skill_name": skill_name,
+                    "folder_created": True,
+                    "venv_created": True,
+                }
+
+    result: Dict[str, object] = {
+        "success": True,
+        "skill_name": skill_name,
+        "folder_created": True,
+        "venv_created": True,
+        "requirements_installed": has_requirements,
+        "pip_output": pip_output,
+        "message": f"Skill '{skill_name}' created successfully!",
+    }
+    _log_duration("confirm_create_skill", start_time)
+    return result
