@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:8003'
 
 // --- Icons ---
 
@@ -53,6 +53,24 @@ const ChatIcon = () => (
 const ToolIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
     <path strokeLinecap="round" strokeLinejoin="round" d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+  </svg>
+)
+
+const ShieldIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+)
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+)
+
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 6L6 18M6 6l12 12" />
   </svg>
 )
 
@@ -161,6 +179,18 @@ function App() {
     updateActiveMessages((prev) => {
       const next = [...prev]
       if (streamIndexRef.current === null || !next[streamIndexRef.current]) {
+        // Look for the last assistant message after any trailing tool messages
+        // so we continue appending instead of creating a split bubble
+        let lastAssistantIdx = null
+        for (let i = next.length - 1; i >= 0; i--) {
+          if (next[i].role === 'assistant') { lastAssistantIdx = i; break }
+          if (next[i].role === 'user') break
+        }
+        if (lastAssistantIdx !== null) {
+          streamIndexRef.current = lastAssistantIdx
+          next[lastAssistantIdx] = { ...next[lastAssistantIdx], content: `${next[lastAssistantIdx].content}${delta}` }
+          return next
+        }
         next.push({ role: 'assistant', content: delta })
         streamIndexRef.current = next.length - 1
         return next
@@ -210,7 +240,6 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'qwen/qwen3-next-80b',
           stream: true,
           messages: payloadMessages,
         }),
@@ -282,6 +311,51 @@ function App() {
 
   const handleStop = () => {
     abortRef.current?.abort()
+  }
+
+  const handleConfirmSkill = async (messageIndex, token) => {
+    updateActiveMessages((prev) => {
+      const next = [...prev]
+      next[messageIndex] = { ...next[messageIndex], confirmationStatus: 'loading' }
+      return next
+    })
+
+    try {
+      const response = await fetch(`${API_BASE}/v1/confirm_create_skill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmation_token: token }),
+      })
+      const result = await response.json()
+
+      updateActiveMessages((prev) => {
+        const next = [...prev]
+        next[messageIndex] = {
+          ...next[messageIndex],
+          confirmationStatus: result.success ? 'approved' : 'error',
+          confirmationResult: result,
+        }
+        return next
+      })
+    } catch (err) {
+      updateActiveMessages((prev) => {
+        const next = [...prev]
+        next[messageIndex] = {
+          ...next[messageIndex],
+          confirmationStatus: 'error',
+          confirmationResult: { error: 'Network error: ' + err.message },
+        }
+        return next
+      })
+    }
+  }
+
+  const handleDenySkill = (messageIndex) => {
+    updateActiveMessages((prev) => {
+      const next = [...prev]
+      next[messageIndex] = { ...next[messageIndex], confirmationStatus: 'denied' }
+      return next
+    })
   }
 
   const handleNewRoom = () => {
@@ -398,19 +472,76 @@ function App() {
             {messages.map((message, index) => {
               // Tool Message
               if (message.role === 'tool') {
+                const needsConfirmation = message.phase === 'end' && message.result?.requires_confirmation
+                const status = message.confirmationStatus // undefined | 'loading' | 'approved' | 'denied' | 'error'
+
                 return (
                   <div key={index} className="flex gap-4 pl-0 md:pl-12">
-                     <div className="w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100/50 px-4 py-2">
+                     <div className={`w-full overflow-hidden rounded-xl border ${
+                       needsConfirmation && !status ? 'border-amber-300 bg-amber-50/50' : 'border-slate-200 bg-slate-50'
+                     }`}>
+                        <div className={`flex items-center justify-between border-b px-4 py-2 ${
+                          needsConfirmation && !status ? 'border-amber-200 bg-amber-100/50' : 'border-slate-200 bg-slate-100/50'
+                        }`}>
                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                              <ToolIcon />
-                              <span>{message.phase === 'start' ? 'Running Tool...' : 'Tool Output'}</span>
+                              {needsConfirmation && !status ? <ShieldIcon /> : <ToolIcon />}
+                              <span>{
+                                needsConfirmation && !status ? 'Permission Required'
+                                : status === 'approved' ? 'Approved ✓'
+                                : status === 'denied' ? 'Denied'
+                                : status === 'loading' ? 'Creating skill...'
+                                : status === 'error' ? 'Error'
+                                : message.phase === 'start' ? 'Running Tool...'
+                                : 'Tool Output'
+                              }</span>
                            </div>
                            <span className="font-mono text-[10px] text-slate-500">{message.toolName}</span>
                         </div>
                         <div className="p-3 text-xs font-mono text-slate-600 overflow-x-auto">
                            {message.phase === 'start' ? (
                               <div className="opacity-80">Input: {message.args}</div>
+                           ) : needsConfirmation && !status ? (
+                              <div className="space-y-3">
+                                <div className="text-sm font-sans font-medium text-slate-800">
+                                  Create skill: <span className="font-bold text-amber-700">{message.result.skill_name}</span>
+                                </div>
+                                <ul className="list-disc pl-5 space-y-1 text-xs font-sans text-slate-600">
+                                  {(message.result.preview_actions || []).map((action, i) => (
+                                    <li key={i}>{action}</li>
+                                  ))}
+                                </ul>
+                                <div className="flex gap-2 pt-1">
+                                  <button
+                                    onClick={() => handleConfirmSkill(index, message.result.confirmation_token)}
+                                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+                                  >
+                                    <CheckIcon /> Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleDenySkill(index)}
+                                    className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-colors"
+                                  >
+                                    <XIcon /> Deny
+                                  </button>
+                                </div>
+                              </div>
+                           ) : status === 'loading' ? (
+                              <div className="flex items-center gap-2 text-xs font-sans text-slate-500">
+                                <span className="h-3 w-3 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></span>
+                                Creating skill, setting up venv, installing packages...
+                              </div>
+                           ) : status === 'approved' ? (
+                              <div className="space-y-1">
+                                <div className="text-xs font-sans text-emerald-700 font-medium">✓ Skill created successfully</div>
+                                <pre className="whitespace-pre-wrap text-[10px] text-slate-500">{JSON.stringify(message.confirmationResult, null, 2)}</pre>
+                              </div>
+                           ) : status === 'denied' ? (
+                              <div className="text-xs font-sans text-slate-500">Skill creation was denied by user.</div>
+                           ) : status === 'error' ? (
+                              <div className="space-y-1">
+                                <div className="text-xs font-sans text-red-600 font-medium">Creation failed</div>
+                                <pre className="whitespace-pre-wrap text-[10px] text-red-500">{JSON.stringify(message.confirmationResult, null, 2)}</pre>
+                              </div>
                            ) : (
                               <pre className="whitespace-pre-wrap">{JSON.stringify(message.result, null, 2)}</pre>
                            )}

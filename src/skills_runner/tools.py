@@ -69,4 +69,63 @@ RUN_PYTHON_SCRIPT_DEF = {
     },
 }
 
-SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF]
+WRITE_FILE_IN_SKILL_DEF = {
+    "type": "function",
+    "function": {
+        "name": "write_file_in_skill",
+        "description": (
+            "Write or create a file within a skill's folder. Use this to add implementation code, "
+            "examples, or config files to a skill. Cannot write into venv or hidden directories."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "skill_name": {
+                    "type": "string",
+                    "description": "Name of the skill (folder name)",
+                },
+                "file_path": {
+                    "type": "string",
+                    "description": "Relative path within skill (e.g., 'store.py', 'examples/demo.py')",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "Full file content to write",
+                },
+            },
+            "required": ["skill_name", "file_path", "content"],
+        },
+    },
+}
+
+CREATE_SKILL_DEF = {
+    "type": "function",
+    "function": {
+        "name": "create_skill",
+        "description": (
+            "Propose creating a new skill. This will NOT immediately create the skill — "
+            "it returns a preview of actions that require user confirmation before execution. "
+            "Use this when the user asks you to create a new skill."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "skill_name": {
+                    "type": "string",
+                    "description": "Name for the new skill (lowercase_with_underscores, used as folder name)",
+                },
+                "skill_md_content": {
+                    "type": "string",
+                    "description": "Full content for the SKILL.md documentation file",
+                },
+                "requirements": {
+                    "type": "string",
+                    "description": "Contents for requirements.txt (one package per line). Leave empty if no dependencies needed.",
+                },
+            },
+            "required": ["skill_name", "skill_md_content"],
+        },
+    },
+}
+
+SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, WRITE_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]

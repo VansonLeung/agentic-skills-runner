@@ -7,7 +7,29 @@ import json
 from .exceptions import ToolExecutionError
 from .llm_client import LLMClient
 from .models import Message
-from .skills_tool import get_skill, list_skills, read_file_in_skill, run_python_script
+from .skills_tool import create_skill, get_skill, list_skills, read_file_in_skill, run_python_script, write_file_in_skill
+
+_FALLBACK_SYSTEM_PROMPT = (
+    "Before you think you cannot assist the user in doing something, e.g. access external websites, "
+    "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
+    "Before using any skill name, call \"list_skills\" to discover available skills. "
+    "Do not guess skill names."
+)
+
+
+def _load_soul_prompt() -> str:
+    """Load the system prompt from soul.md at the project root.
+
+    Searches upward from this file's location for soul.md.
+    Falls back to a minimal hardcoded prompt if not found.
+    """
+    search_dir = Path(__file__).resolve().parent
+    for _ in range(5):
+        candidate = search_dir / "soul.md"
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8").strip()
+        search_dir = search_dir.parent
+    return _FALLBACK_SYSTEM_PROMPT
 
 
 class Conversation:
@@ -17,15 +39,7 @@ class Conversation:
         self.tools = tools
         self.skills_folder = skills_folder
         self.messages: List[Message] = [
-            Message(
-                role="system",
-                content=(
-                    "Before you think you cannot assist the user in doing something, e.g. access external websites, "
-                    "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
-                    "Before using any skill name, call \"list_skills\" to discover available skills. "
-                    "Do not guess skill names."
-                ),
-            )
+            Message(role="system", content=_load_soul_prompt())
         ]
 
     def load_messages(self, messages: List[Dict[str, Any]]) -> None:
@@ -34,15 +48,7 @@ class Conversation:
         self.messages = []
         if not has_system:
             self.messages.append(
-                Message(
-                    role="system",
-                    content=(
-                        "Before you think you cannot assist the user in doing something, e.g. access external websites, "
-                        "you MUST ALWAYS call this tool: \"list_skills\" to discover your available skills to help the user. "
-                        "Before using any skill name, call \"list_skills\" to discover available skills. "
-                        "Do not guess skill names."
-                    ),
-                )
+                Message(role="system", content=_load_soul_prompt())
             )
 
         for message in messages:
@@ -69,6 +75,52 @@ class Conversation:
         self.messages.append(Message(role="user", content=user_input))
         return self.run(tool_event_handler=tool_event_handler)
 
+    _MAX_TOOL_ROUNDS = 15
+    _MAX_CONTEXT_MESSAGES = 50
+
+    def _trim_context(self) -> None:
+        """Keep context window manageable by trimming old messages.
+
+        Preserves the system prompt (first message) and the most recent
+        _MAX_CONTEXT_MESSAGES messages. Tool results in trimmed messages
+        are summarized to reduce token usage.
+        """
+        if len(self.messages) <= self._MAX_CONTEXT_MESSAGES + 1:
+            return
+
+        system_msg = self.messages[0] if self.messages[0].role == "system" else None
+        start = 1 if system_msg else 0
+
+        # Keep only the most recent messages
+        recent = self.messages[-(self._MAX_CONTEXT_MESSAGES):]
+
+        # Build trimmed list
+        trimmed: List[Message] = []
+        if system_msg:
+            trimmed.append(system_msg)
+
+        # Add a context note about trimmed history
+        trimmed_count = len(self.messages) - len(recent) - start
+        if trimmed_count > 0:
+            trimmed.append(Message(
+                role="system",
+                content=f"[Context note: {trimmed_count} earlier messages were trimmed to save context space. Focus on the recent conversation.]",
+            ))
+
+        # Summarize large tool results in recent messages
+        for msg in recent:
+            if msg.role == "tool" and msg.content and len(msg.content) > 2000:
+                trimmed.append(Message(
+                    role=msg.role,
+                    content=msg.content[:1500] + "\n... [truncated — result was too large]",
+                    tool_call_id=msg.tool_call_id,
+                    name=msg.name,
+                ))
+            else:
+                trimmed.append(msg)
+
+        self.messages = trimmed
+
     def run(
         self,
         tool_event_handler: Optional[
@@ -76,7 +128,9 @@ class Conversation:
         ] = None,
     ) -> str:
         """Run a conversation turn using the current message history."""
-        while True:
+        rounds = 0
+        while rounds < self._MAX_TOOL_ROUNDS:
+            self._trim_context()
             response_message = self.client.chat(self._serialize_messages(), self.tools)
             tool_calls = response_message.get("tool_calls")
             content = response_message.get("content")
@@ -86,6 +140,7 @@ class Conversation:
             )
 
             if tool_calls:
+                rounds += 1
                 for tool_call in tool_calls:
                     if tool_event_handler:
                         tool_event_handler("start", tool_call, None)
@@ -107,6 +162,8 @@ class Conversation:
             if not isinstance(content, str):
                 raise ToolExecutionError("LLM response missing content")
             return content
+
+        return f"Reached maximum tool rounds ({self._MAX_TOOL_ROUNDS}). Stopping to prevent infinite loop."
 
     def _serialize_messages(self) -> List[Dict[str, Any]]:
         """Convert Message objects to API payload dictionaries."""
@@ -139,6 +196,20 @@ class Conversation:
                 params.get("script", ""),
                 self.skills_folder,
                 self.client.timeout_seconds,
+            )
+        if name == "write_file_in_skill":
+            return write_file_in_skill(
+                params.get("skill_name", ""),
+                params.get("file_path", ""),
+                params.get("content", ""),
+                self.skills_folder,
+            )
+        if name == "create_skill":
+            return create_skill(
+                params.get("skill_name", ""),
+                params.get("skill_md_content", ""),
+                params.get("requirements"),
+                self.skills_folder,
             )
 
         return {"error": f"Unknown tool: {name}"}

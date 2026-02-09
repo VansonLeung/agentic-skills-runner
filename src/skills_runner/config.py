@@ -32,7 +32,7 @@ class Configuration:
         timeout_raw = os.getenv("SCRIPT_TIMEOUT_SECONDS", "30").strip()
 
         if not api_key:
-            raise ConfigError("LLM_API_KEY is required")
+            logging.warning("LLM_API_KEY is not set; requests may fail if the provider requires one")
         if not api_base_url:
             raise ConfigError("LLM_API_BASE_URL is required")
         if not model_name:
