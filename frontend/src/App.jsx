@@ -240,7 +240,6 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'qwen/qwen3-next-80b',
           stream: true,
           messages: payloadMessages,
         }),
