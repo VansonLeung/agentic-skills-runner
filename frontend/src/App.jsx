@@ -117,6 +117,9 @@ function App() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState('')
   
+  const [models, setModels] = useState([])
+  const [selectedModel, setSelectedModel] = useState('')
+  
   const streamIndexRef = useRef(null)
   const abortRef = useRef(null)
   const bottomRef = useRef(null)
@@ -124,6 +127,22 @@ function App() {
 
   const activeRoom = rooms.find((room) => room.id === activeRoomId) || rooms[0]
   const messages = activeRoom?.messages || []
+
+  // Fetch available models on mount
+  useEffect(() => {
+    fetch(`${API_BASE}/v1/models`)
+      .then((res) => res.json())
+      .then((data) => {
+        const modelList = (data.data || []).map((m) => m.id)
+        setModels(modelList)
+        if (!selectedModel && data.default) {
+          setSelectedModel(data.default)
+        } else if (!selectedModel && modelList.length > 0) {
+          setSelectedModel(modelList[0])
+        }
+      })
+      .catch((err) => console.warn('Failed to fetch models', err))
+  }, [])
 
   // Auto-scroll logic
   useEffect(() => {
@@ -240,6 +259,7 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          model: selectedModel || undefined,
           stream: true,
           messages: payloadMessages,
         }),
@@ -451,7 +471,7 @@ function App() {
         <header className="flex h-14 items-center justify-between border-b border-slate-100 px-4 md:hidden">
             <span className="font-bold text-slate-800">Skills Runner</span>
             <div className="text-[10px] uppercase tracking-wider text-slate-400">
-              Qwen3-Next
+              {selectedModel || 'Loading...'}
             </div>
         </header>
 
@@ -460,10 +480,23 @@ function App() {
            <div className="flex items-center gap-2">
              <span className="text-sm font-semibold text-slate-500">{activeRoom?.title}</span>
            </div>
-           <div className="flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Qwen 80B
-           </div>
+           {models.length > 1 ? (
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="appearance-none rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 pr-7 text-xs font-medium text-slate-600 outline-none cursor-pointer hover:bg-slate-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+              >
+                {models.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+           ) : (
+              <div className="flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                {selectedModel || 'Loading...'}
+              </div>
+           )}
         </header>
 
         {/* Messages */}

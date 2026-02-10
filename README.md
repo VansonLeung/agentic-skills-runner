@@ -14,15 +14,25 @@ https://github.com/user-attachments/assets/73b36255-e050-4777-b734-b5f458b3cd08
 pip install -e .
 ```
 
-Create a .env file:
+Create a `.env` file:
 
 ```bash
-LLM_API_KEY=sk-your-api-key
+LLM_API_KEY=sk-your-api-key            # Optional for local LLMs (LM Studio, Ollama, vLLM)
 LLM_API_BASE_URL=https://api.openai.com/v1
-LLM_MODEL_NAME=gpt-4
-SKILLS_FOLDER_PATH=./skills
-SCRIPT_TIMEOUT_SECONDS=30
+LLM_MODEL_NAME=gpt-4                   # Default model
+LLM_MODEL_NAMES=gpt-4,gpt-3.5-turbo   # Comma-separated list for model selector (optional)
+SKILLS_FOLDER_PATH=./SKILLS
+SCRIPT_TIMEOUT_SECONDS=300
 ```
+
+| Variable | Required | Description |
+|---|---|---|
+| `LLM_API_KEY` | No | API key for the LLM provider. Optional for local servers. |
+| `LLM_API_BASE_URL` | **Yes** | Base URL of the OpenAI-compatible API endpoint. |
+| `LLM_MODEL_NAME` | Yes* | Default model name to use. |
+| `LLM_MODEL_NAMES` | No | Comma-separated list of models. Enables the model selector dropdown in the frontend. If set, `LLM_MODEL_NAME` can be omitted (first model becomes default). |
+| `SKILLS_FOLDER_PATH` | No | Path to the skills folder. Defaults to `./skills`. |
+| `SCRIPT_TIMEOUT_SECONDS` | No | Timeout for script execution and LLM API calls. Defaults to `30`. Increase for slower models. |
 
 Start a chat session:
 
