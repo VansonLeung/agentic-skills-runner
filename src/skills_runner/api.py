@@ -170,6 +170,17 @@ def chat_completions(request: ChatCompletionRequest) -> Any:
     return JSONResponse(payload)
 
 
+@app.get("/v1/models")
+def list_models() -> Any:
+    """Return the list of available models from config."""
+    config = Configuration.from_env()
+    models = [
+        {"id": name, "object": "model", "owned_by": "config"}
+        for name in config.model_names
+    ]
+    return JSONResponse({"object": "list", "data": models, "default": config.model_name})
+
+
 class ConfirmCreateSkillRequest(BaseModel):
     confirmation_token: str
 

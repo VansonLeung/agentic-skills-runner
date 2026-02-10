@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 import logging
 import os
 
@@ -17,6 +17,7 @@ class Configuration:
     api_key: str
     api_base_url: str
     model_name: str
+    model_names: tuple
     skills_folder: Path
     timeout_seconds: int
 
@@ -28,6 +29,7 @@ class Configuration:
         api_key = os.getenv("LLM_API_KEY", "").strip()
         api_base_url = os.getenv("LLM_API_BASE_URL", "").strip()
         model_name = os.getenv("LLM_MODEL_NAME", "").strip()
+        model_names_raw = os.getenv("LLM_MODEL_NAMES", "").strip()
         skills_folder_raw = os.getenv("SKILLS_FOLDER_PATH", "./skills").strip()
         timeout_raw = os.getenv("SCRIPT_TIMEOUT_SECONDS", "30").strip()
 
@@ -35,8 +37,20 @@ class Configuration:
             logging.warning("LLM_API_KEY is not set; requests may fail if the provider requires one")
         if not api_base_url:
             raise ConfigError("LLM_API_BASE_URL is required")
+        # Parse model list: LLM_MODEL_NAMES takes priority, falls back to LLM_MODEL_NAME
+        if model_names_raw:
+            model_names = tuple(m.strip() for m in model_names_raw.split(",") if m.strip())
+        elif model_name:
+            model_names = (model_name,)
+        else:
+            model_names = ()
+
+        if not model_names:
+            raise ConfigError("LLM_MODEL_NAME or LLM_MODEL_NAMES is required")
+
+        # Default model is the first in the list
         if not model_name:
-            raise ConfigError("LLM_MODEL_NAME is required")
+            model_name = model_names[0]
 
         skills_folder = Path(skills_folder_raw)
         timeout_seconds = _parse_positive_int(timeout_raw, "SCRIPT_TIMEOUT_SECONDS")
@@ -47,6 +61,7 @@ class Configuration:
             api_key=api_key,
             api_base_url=api_base_url,
             model_name=model_name,
+            model_names=model_names,
             skills_folder=skills_folder,
             timeout_seconds=timeout_seconds,
         )
