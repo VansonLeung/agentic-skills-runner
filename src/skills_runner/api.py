@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 import json
+import os
 import queue
 import threading
 import time
 import uuid
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
+import uvicorn
 
 from .config import Configuration
 from .conversation import Conversation
@@ -179,3 +182,29 @@ def confirm_create_skill_endpoint(request: ConfirmCreateSkillRequest) -> Any:
     """Execute a pending skill creation after user confirmation."""
     result = confirm_create_skill(request.confirmation_token)
     return JSONResponse(result)
+
+
+def _read_server_host_port() -> tuple[str, int]:
+    load_dotenv()
+
+    host = os.getenv("API_HOST", "0.0.0.0").strip() or "0.0.0.0"
+    port_raw = os.getenv("API_PORT", "18083").strip() or "18083"
+
+    try:
+        port = int(port_raw)
+    except ValueError as exc:
+        raise ValueError("API_PORT must be an integer") from exc
+
+    if port <= 0 or port > 65535:
+        raise ValueError("API_PORT must be between 1 and 65535")
+
+    return host, port
+
+
+def main() -> None:
+    host, port = _read_server_host_port()
+    uvicorn.run(app, host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()

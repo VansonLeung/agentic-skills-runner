@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:8003'
+const API_BASE = import.meta.env.VITE_SKILLS_RUNNER_API || 'http://localhost:18083'
 
 // --- Icons ---
 

@@ -22,6 +22,8 @@ LLM_API_BASE_URL=https://api.openai.com/v1
 LLM_MODEL_NAME=gpt-4
 SKILLS_FOLDER_PATH=./skills
 SCRIPT_TIMEOUT_SECONDS=30
+API_HOST=0.0.0.0
+API_PORT=18083
 ```
 
 Start a chat session:
@@ -33,7 +35,7 @@ python -m skills_runner chat "What skills are available?"
 Start the API server:
 
 ```bash
-uvicorn skills_runner.api:app --reload
+python3 -m src.skills_runner.api
 ```
 
 ## Library Usage
@@ -79,7 +81,7 @@ skills-runner chat "List my skills"
 OpenAI-compatible chat endpoint:
 
 ```bash
-curl http://localhost:8000/v1/chat/completions \
+curl http://localhost:18083/v1/chat/completions \
     -H "Content-Type: application/json" \
     -d '{
         "model": "gpt-4",
@@ -90,7 +92,7 @@ curl http://localhost:8000/v1/chat/completions \
 Streaming response:
 
 ```bash
-curl http://localhost:8000/v1/chat/completions \
+curl http://localhost:18083/v1/chat/completions \
     -H "Content-Type: application/json" \
     -d '{
         "model": "gpt-4",
