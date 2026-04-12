@@ -3,7 +3,7 @@
 **Feature Branch**: `001-llm-skills-runner`  
 **Created**: 2026-02-07  
 **Status**: Draft  
-**Input**: User description: "an LLM / VLM kit which has the following features: calls LLM / VLM APIs, when running the API, it has a tool called Skills, what Skills do to assist LLM to do extra powerful things: LIST_SKILLS - obtain a list of skills given a local folder of subfolders, GET_SKILL - given a subfolder name (of the skill) - look for SKILL.MD inside it and obtain / read / study the contents, READ_FILE_IN_SKILL - read any file within a skill subfolder (since not all information is in SKILL.MD, which serves as a table of contents), RUN_PYTHON_SCRIPT - given the subfolder name (of the skill) - let's say an venv is installed inside the subfolder, run a given python script (in which the python script is determined / composed by the LLM, and is probably taught by learning from the skill) and obtain result(s), the main folder to put subfolders of skills shall be configured in an .env or provided by a variable, the LLM / VLM API credentials and urls shall be configured in an .env, your development approach should be mainly focusing on the workable MVP first (i.e. LLM API working, Skills integration working). MVP simplification: scripts have full filesystem access (security/sandbox deferred to post-MVP). Future vision: will become an MCP server after MVP is validated."
+**Input**: User description: "an LLM / VLM kit which has the following features: calls LLM / VLM APIs, when running the API, it has a tool called Skills, what Skills do to assist LLM to do extra powerful things: LIST_SKILLS - obtain a list of skills given a local folder of subfolders, GET_SKILL - given a subfolder name (of the skill) - look for SKILL.MD inside it and obtain / read / study the contents, READ_FILES_IN_SKILL - read one or more files within a skill subfolder (since not all information is in SKILL.MD, which serves as a table of contents), RUN_PYTHON_SCRIPT - given the subfolder name (of the skill) - let's say an venv is installed inside the subfolder, run a given python script (in which the python script is determined / composed by the LLM, and is probably taught by learning from the skill) and obtain result(s), the main folder to put subfolders of skills shall be configured in an .env or provided by a variable, the LLM / VLM API credentials and urls shall be configured in an .env, your development approach should be mainly focusing on the workable MVP first (i.e. LLM API working, Skills integration working). MVP simplification: scripts have full filesystem access (security/sandbox deferred to post-MVP). Future vision: will become an MCP server after MVP is validated."
 
 ## Clarifications
 
@@ -36,9 +36,9 @@ A developer imports the toolkit as a Python library (or uses the CLI), configure
 
 A developer starts a conversation where the LLM autonomously discovers available skills in the configured folder and reads skill documentation. The LLM can read SKILL.MD as a table of contents, then read additional files within skills for deeper information. Tool calls and results are visible to the user, enabling the LLM to understand what capabilities are available without manual intervention.
 
-**Why this priority**: Skills discovery is the bridge between basic LLM functionality and enhanced capabilities. Once implemented, it allows the system to be self-aware of its extensions, making the toolkit genuinely agentic. The automatic execution model means the LLM can explore and utilize skills naturally during conversation. READ_FILE_IN_SKILL enables rich skill documentation beyond a single markdown file.
+**Why this priority**: Skills discovery is the bridge between basic LLM functionality and enhanced capabilities. Once implemented, it allows the system to be self-aware of its extensions, making the toolkit genuinely agentic. The automatic execution model means the LLM can explore and utilize skills naturally during conversation. READ_FILES_IN_SKILL enables rich skill documentation beyond a single markdown file.
 
-**Independent Test**: Can be fully tested by creating a skills folder with several skill subfolders containing SKILL.MD files and additional documentation/scripts, starting a conversation that would benefit from skills, and verifying the LLM autonomously calls LIST_SKILLS, GET_SKILL, and READ_FILE_IN_SKILL with results displayed to the user.
+**Independent Test**: Can be fully tested by creating a skills folder with several skill subfolders containing SKILL.MD files and additional documentation/scripts, starting a conversation that would benefit from skills, and verifying the LLM autonomously calls LIST_SKILLS, GET_SKILL, and READ_FILES_IN_SKILL with results displayed to the user.
 
 **Acceptance Scenarios**:
 
@@ -47,8 +47,8 @@ A developer starts a conversation where the LLM autonomously discovers available
 3. **Given** a skill subfolder without SKILL.MD, **When** user invokes GET_SKILL, **Then** system returns an error indicating missing documentation
 4. **Given** an empty or non-existent skills folder path, **When** user invokes LIST_SKILLS, **Then** system returns an empty list or clear message indicating no skills found
 5. **Given** an LLM conversation where the tool is available, **When** the LLM decides it needs to know available skills, **Then** LLM can successfully call LIST_SKILLS and use the results
-6. **Given** a skill with SKILL.MD referencing additional files, **When** LLM invokes READ_FILE_IN_SKILL with skill name and relative file path, **Then** system reads and returns the file contents
-7. **Given** a file path outside the skill folder, **When** LLM attempts to read it via READ_FILE_IN_SKILL, **Then** system returns an error preventing directory traversal
+6. **Given** a skill with SKILL.MD referencing additional files, **When** LLM invokes READ_FILES_IN_SKILL with skill name and one or more relative file paths, **Then** system reads and returns the file contents
+7. **Given** a file path outside the skill folder, **When** LLM attempts to read it via READ_FILES_IN_SKILL, **Then** system returns an error preventing directory traversal
 
 ---
 
@@ -129,15 +129,15 @@ The LLM generates a Python script based on skill documentation, and the system e
 - **FR-022**: System MUST handle cases where SKILL.MD doesn't exist in the skill folder
 - **FR-023**: System MUST automatically execute GET_SKILL when LLM calls it, displaying the tool call and results to the user
 
-**Skills Tool - READ_FILE_IN_SKILL**
+**Skills Tool - READ_FILES_IN_SKILL**
 
-- **FR-024**: System MUST accept a skill name and relative file path as parameters
-- **FR-025**: System MUST locate the specified skill subfolder and resolve the relative file path within it
+- **FR-024**: System MUST accept a skill name and one or more relative file paths as parameters
+- **FR-025**: System MUST locate the specified skill subfolder and resolve each relative file path within it
 - **FR-026**: System MUST prevent directory traversal attacks (e.g., "../../../etc/passwd") by validating paths
-- **FR-027**: System MUST read and return the contents of the specified file within the skill folder
+- **FR-027**: System MUST read and return the contents of the specified files within the skill folder
 - **FR-028**: System MUST handle cases where the requested file doesn't exist
-- **FR-029**: System MUST automatically execute READ_FILE_IN_SKILL when LLM calls it, displaying the tool call and results to the user
-- **FR-030**: System MUST support reading various file types (text, scripts, documentation, configuration files)
+- **FR-029**: System MUST automatically execute READ_FILES_IN_SKILL when LLM calls it, displaying the tool call and results to the user
+- **FR-030**: System MUST support reading various file types (text, scripts, documentation, configuration files) across one or more requested files
 
 **Skills Tool - RUN_PYTHON_SCRIPT**
 
@@ -165,7 +165,7 @@ The LLM generates a Python script based on skill documentation, and the system e
 
 - **Skill**: Represents a capability extension stored as a subfolder. Attributes include skill name (folder name), documentation path (SKILL.MD), virtual environment path (venv folder), and status (available/unavailable).
 
-- **SkillsTool**: Represents the tool interface exposed to the LLM. Contains four operations (LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT) and manages skill folder access.
+- **SkillsTool**: Represents the tool interface exposed to the LLM. Contains four operations (LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT) and manages skill folder access.
 
 - **ScriptExecution**: Represents a Python script execution request. Attributes include target skill, script code, execution timeout, venv path, and results (output, errors, exit code).
 
@@ -181,11 +181,11 @@ The LLM generates a Python script based on skill documentation, and the system e
 - **SC-004**: LIST_SKILLS operation completes and returns results in under 1 second for folders with up to 100 skills
 - **SC-005**: GET_SKILL operation successfully reads and returns SKILL.MD content in under 500ms for files up to 1MB
 - **SC-006**: RUN_PYTHON_SCRIPT executes simple scripts (under 100 lines) and returns results in under 5 seconds
-- **SC-007**: LLM autonomously uses SKILLS tools (LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT) to discover, learn documentation, and execute code for at least 3 different skills in a single conversation without manual intervention
+- **SC-007**: LLM autonomously uses SKILLS tools (LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT) to discover, learn documentation, and execute code for at least 3 different skills in a single conversation without manual intervention
 - **SC-008**: All tool calls and results are visible to the user in real-time during conversation
 - **SC-009**: System handles API errors gracefully with clear messages in 100% of error scenarios
 - **SC-010**: Configuration errors are detected and reported with actionable messages before any API calls are attempted
-- **SC-011**: READ_FILE_IN_SKILL successfully reads skill files and prevents directory traversal in 100% of attempts
+- **SC-011**: READ_FILES_IN_SKILL successfully reads skill files and prevents directory traversal in 100% of attempts
 - **SC-012**: System achieves 90% uptime for API operations excluding external API downtime
 
 ## Assumptions

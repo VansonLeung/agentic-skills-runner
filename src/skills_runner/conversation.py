@@ -7,7 +7,7 @@ import json
 from .exceptions import ToolExecutionError
 from .llm_client import LLMClient
 from .models import Message
-from .skills_tool import create_skill, get_skill, list_skills, read_file_in_skill, run_python_script, write_file_in_skill
+from .skills_tool import create_skill, get_skill, list_skills, read_files_in_skill, run_python_script, write_file_in_skill
 
 _FALLBACK_SYSTEM_PROMPT = (
     "Before you think you cannot assist the user in doing something, e.g. access external websites, "
@@ -184,10 +184,10 @@ class Conversation:
             return list_skills(self.skills_folder)
         if name == "get_skill":
             return get_skill(params.get("skill_name", ""), self.skills_folder)
-        if name == "read_file_in_skill":
-            return read_file_in_skill(
+        if name == "read_files_in_skill":
+            return read_files_in_skill(
                 params.get("skill_name", ""),
-                params.get("file_path", ""),
+                params.get("file_paths", []),
                 self.skills_folder,
             )
         if name == "run_python_script":

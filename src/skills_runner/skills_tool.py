@@ -85,30 +85,19 @@ def get_skill(skill_name: str, skills_folder: Path) -> Dict[str, object]:
     return result
 
 
-def read_file_in_skill(skill_name: str, file_path: str, skills_folder: Path) -> Dict[str, object]:
-    """Read a file within a skill folder with path validation."""
-    start_time = time.perf_counter()
-    skills_folder = skills_folder.resolve()
-    if not validate_skill_name(skill_name):
-        return {"success": False, "skill_name": skill_name, "file_path": file_path, "error": "Invalid skill name"}
-
-    if not file_path:
-        return {"success": False, "skill_name": skill_name, "file_path": file_path, "error": "Invalid file path"}
-
-    skill_dir = skills_folder / skill_name
-    if not skill_dir.exists():
+def _read_single_file_in_skill(skill_dir: Path, skill_name: str, file_path: str) -> Dict[str, object]:
+    """Read one file within a skill folder with path validation."""
+    if not isinstance(file_path, str) or not file_path:
         return {
             "success": False,
-            "skill_name": skill_name,
             "file_path": file_path,
-            "error": f"Skill '{skill_name}' not found in skills folder",
+            "error": "Invalid file path",
         }
 
     requested_file = (skill_dir / file_path).resolve()
     if not requested_file.is_relative_to(skill_dir):
         return {
             "success": False,
-            "skill_name": skill_name,
             "file_path": file_path,
             "error": "Path traversal detected: cannot access files outside skill folder",
         }
@@ -116,7 +105,6 @@ def read_file_in_skill(skill_name: str, file_path: str, skills_folder: Path) -> 
     if not requested_file.exists():
         return {
             "success": False,
-            "skill_name": skill_name,
             "file_path": file_path,
             "error": f"File '{file_path}' not found in skill '{skill_name}'",
         }
@@ -126,27 +114,62 @@ def read_file_in_skill(skill_name: str, file_path: str, skills_folder: Path) -> 
     except UnicodeDecodeError:
         return {
             "success": False,
-            "skill_name": skill_name,
             "file_path": file_path,
             "error": f"Cannot read file '{file_path}': invalid UTF-8",
         }
     except OSError as exc:
         return {
             "success": False,
-            "skill_name": skill_name,
             "file_path": file_path,
             "error": f"Cannot read file '{file_path}': {exc}",
         }
 
-    result = {
+    return {
         "success": True,
-        "skill_name": skill_name,
         "file_path": file_path,
         "content": content,
         "size_bytes": requested_file.stat().st_size,
         "encoding": "utf-8",
     }
-    _log_duration("read_file_in_skill", start_time)
+
+
+def read_files_in_skill(skill_name: str, file_paths: List[str], skills_folder: Path) -> Dict[str, object]:
+    """Read one or more files within a skill folder with path validation."""
+    start_time = time.perf_counter()
+    skills_folder = skills_folder.resolve()
+    if not validate_skill_name(skill_name):
+        return {
+            "success": False,
+            "skill_name": skill_name,
+            "file_paths": file_paths,
+            "error": "Invalid skill name",
+        }
+
+    if not isinstance(file_paths, list) or not file_paths:
+        return {
+            "success": False,
+            "skill_name": skill_name,
+            "file_paths": file_paths,
+            "error": "Invalid file paths",
+        }
+
+    skill_dir = skills_folder / skill_name
+    if not skill_dir.exists():
+        return {
+            "success": False,
+            "skill_name": skill_name,
+            "file_paths": file_paths,
+            "error": f"Skill '{skill_name}' not found in skills folder",
+        }
+
+    files = [_read_single_file_in_skill(skill_dir, skill_name, file_path) for file_path in file_paths]
+    result = {
+        "success": all(file_result.get("success") is True for file_result in files),
+        "skill_name": skill_name,
+        "file_paths": file_paths,
+        "files": files,
+    }
+    _log_duration("read_files_in_skill", start_time)
     return result
 
 

@@ -1,4 +1,4 @@
-from skills_runner.skills_tool import get_skill, list_skills, read_file_in_skill, run_python_script
+from skills_runner.skills_tool import get_skill, list_skills, read_files_in_skill, run_python_script
 
 
 def test_list_skills_filters_invalid_names(tmp_path):
@@ -16,10 +16,10 @@ def test_get_skill_returns_error_for_missing_skill(tmp_path):
     assert "error" in result
 
 
-def test_read_file_in_skill_blocks_traversal(tmp_path):
+def test_read_files_in_skill_blocks_traversal(tmp_path):
     (tmp_path / "docs").mkdir()
 
-    result = read_file_in_skill("docs", "../secret.txt", tmp_path)
+    result = read_files_in_skill("docs", ["../secret.txt"], tmp_path)
 
     assert result.get("success") is False
 

@@ -213,20 +213,20 @@ tool_call = ToolCall(
 }
 ```
 
-**read_file_in_skill**:
+**read_files_in_skill**:
 ```python
 {
     "type": "function",
     "function": {
-        "name": "read_file_in_skill",
+        "name": "read_files_in_skill",
         "description": "Read any file within a skill's folder. Use when SKILL.MD references additional files.",
         "parameters": {
             "type": "object",
             "properties": {
                 "skill_name": {"type": "string", "description": "Skill folder name"},
-                "file_path": {"type": "string", "description": "Relative path within skill (e.g., 'examples/usage.py')"}
+                "file_paths": {"type": "array", "items": {"type": "string"}, "description": "List of relative paths within skill (e.g., ['examples/usage.py'])"}
             },
-            "required": ["skill_name", "file_path"]
+            "required": ["skill_name", "file_paths"]
         }
     }
 }

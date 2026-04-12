@@ -248,11 +248,11 @@ class Config:
 
 ---
 
-## Decision 7: READ_FILE_IN_SKILL Implementation
+## Decision 7: READ_FILES_IN_SKILL Implementation
 
 **Context**: Skills may have rich documentation beyond SKILL.MD (examples, config templates, reference docs). SKILL.MD serves as table of contents, LLM needs to read referenced files.
 
-**Decision**: Implement READ_FILE_IN_SKILL tool accepting skill name + relative file path, with directory traversal protection.
+**Decision**: Implement READ_FILES_IN_SKILL tool accepting skill name + one or more relative file paths, with directory traversal protection.
 
 **Rationale**:
 - SKILL.MD as index: Main documentation points to additional resources
@@ -268,15 +268,15 @@ class Config:
 
 **Implementation Notes**:
 ```python
-def read_file_in_skill(skill_name: str, file_path: str) -> str:
+def read_files_in_skill(skill_name: str, file_paths: list[str]) -> dict:
     skill_dir = Path(skills_folder) / skill_name
-    requested_file = (skill_dir / file_path).resolve()
-    
-    # Ensure resolved path is within skill folder (prevent ../../../etc/passwd)
-    if not requested_file.is_relative_to(skill_dir):
-        raise ValueError(f"Path traversal detected: {file_path}")
-    
-    return requested_file.read_text()
+    files = []
+    for file_path in file_paths:
+        requested_file = (skill_dir / file_path).resolve()
+        if not requested_file.is_relative_to(skill_dir):
+            raise ValueError(f"Path traversal detected: {file_path}")
+        files.append({"file_path": file_path, "content": requested_file.read_text()})
+    return {"files": files}
 ```
 
 **Security Considerations**:
@@ -291,7 +291,7 @@ def read_file_in_skill(skill_name: str, file_path: str) -> str:
 
 ## Decision 8: Tool Calling Schema Format
 
-**Context**: Skills tools (LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT) must be registered with LLM using OpenAI function calling format.
+**Context**: Skills tools (LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT) must be registered with LLM using OpenAI function calling format.
 
 **Decision**: Define tools using JSON Schema for parameters, following OpenAI function calling specification.
 
@@ -335,8 +335,8 @@ SKILLS_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "read_file_in_skill",
-            "description": "Read any file within a skill's folder. Use this when SKILL.MD references additional documentation, examples, or configuration files.",
+            "name": "read_files_in_skill",
+            "description": "Read one or more files within a skill's folder. Use this when SKILL.MD references additional documentation, examples, or configuration files.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -344,12 +344,13 @@ SKILLS_TOOLS = [
                         "type": "string",
                         "description": "Name of the skill (folder name)"
                     },
-                    "file_path": {
-                        "type": "string",
-                        "description": "Relative path to file within skill folder (e.g., 'examples/usage.py')"
+                    "file_paths": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Relative paths to files within skill folder (e.g., ['examples/usage.py'])"
                     }
                 },
-                "required": ["skill_name", "file_path"]
+                "required": ["skill_name", "file_paths"]
             }
         }
     },

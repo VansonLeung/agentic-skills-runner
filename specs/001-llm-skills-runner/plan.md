@@ -7,7 +7,7 @@
 
 ## Summary
 
-Build an agentic LLM toolkit that connects to OpenAI-compatible APIs and extends capabilities through a Skills system. Skills (stored as subfolders) provide documentation and executable Python scripts. The LLM can autonomously discover skills (LIST_SKILLS), read documentation (GET_SKILL, READ_FILE_IN_SKILL), and execute Python code (RUN_PYTHON_SCRIPT) in skill-specific virtual environments. Deployed as a Python library with CLI wrapper for dual programmatic and command-line access. MVP focuses on working API integration, automatic tool execution with user visibility, and simplified security model (full filesystem access, isolation deferred post-MVP). Future vision: migrate to MCP server after MVP validation. VLM/vision support deferred to post-MVP.
+Build an agentic LLM toolkit that connects to OpenAI-compatible APIs and extends capabilities through a Skills system. Skills (stored as subfolders) provide documentation and executable Python scripts. The LLM can autonomously discover skills (LIST_SKILLS), read documentation (GET_SKILL, READ_FILES_IN_SKILL), and execute Python code (RUN_PYTHON_SCRIPT) in skill-specific virtual environments. Deployed as a Python library with CLI wrapper for dual programmatic and command-line access. MVP focuses on working API integration, automatic tool execution with user visibility, and simplified security model (full filesystem access, isolation deferred post-MVP). Future vision: migrate to MCP server after MVP validation. VLM/vision support deferred to post-MVP.
 
 ## Technical Context
 
@@ -17,7 +17,7 @@ Build an agentic LLM toolkit that connects to OpenAI-compatible APIs and extends
 **Testing**: pytest, pytest-asyncio, pytest-mock (unit, integration, contract tests)  
 **Target Platform**: Cross-platform (Linux, macOS, Windows) - local execution  
 **Project Type**: Single project (Python library + CLI wrapper)  
-**Performance Goals**: LIST_SKILLS <1s for 100 skills, GET_SKILL <500ms for 1MB files, READ_FILE_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s for simple scripts  
+**Performance Goals**: LIST_SKILLS <1s for 100 skills, GET_SKILL <500ms for 1MB files, READ_FILES_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s for simple scripts  
 **Constraints**: <30s script execution timeout (default), OpenAI-compatible API format required, MVP text-only (VLM post-MVP)  
 **Scale/Scope**: MVP supports single user, local skills folder, synchronous API calls, text-only LLM interactions
 
@@ -26,13 +26,13 @@ Build an agentic LLM toolkit that connects to OpenAI-compatible APIs and extends
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 **I. Separation of Concerns** - ✅ PASS  
-Four distinct tools (LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT) with clear, non-overlapping responsibilities. Configuration, API client, skills management, and execution are separate modules.
+Four distinct tools (LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT) with clear, non-overlapping responsibilities. Configuration, API client, skills management, and execution are separate modules.
 
 **II. Modularization** - ✅ PASS  
 Single Python project with modular design: Configuration module, LLMClient module, SkillsTool module (4 operations), Executor module. CLI wraps library. Each module independently testable.
 
 **III. Code Simplicity** - ✅ PASS  
-MVP-first approach with simplified security model (full filesystem access, no complex sandbox). KISS/YAGNI demonstrated: synchronous HTTP (no unnecessary async), simple subprocess execution, file-based storage (no database overhead). READ_FILE_IN_SKILL is straightforward file read with path validation.
+MVP-first approach with simplified security model (full filesystem access, no complex sandbox). KISS/YAGNI demonstrated: synchronous HTTP (no unnecessary async), simple subprocess execution, file-based storage (no database overhead). READ_FILES_IN_SKILL is straightforward file read with path validation.
 
 **IV. Code Quality** - ✅ PASS  
 Python 3.9+ type hints required, pytest for testing, linting standards expected. Clear error messages for all failure scenarios (FR-042).
@@ -44,7 +44,7 @@ Contract tests specified for all 4 tools (input/output validation), unit tests f
 All tools follow consistent execution pattern: automatic execution with visible tool calls/results (FR-044). CLI and library provide parallel interfaces. Error messages follow clear, actionable format.
 
 **VII. Performance Requirements** - ✅ PASS  
-Explicit performance targets: LIST_SKILLS <1s (100 skills), GET_SKILL <500ms (1MB), READ_FILE_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s (simple scripts), 30s timeout (default).
+Explicit performance targets: LIST_SKILLS <1s (100 skills), GET_SKILL <500ms (1MB), READ_FILES_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s (simple scripts), 30s timeout (default).
 
 ## Project Structure
 
@@ -69,7 +69,7 @@ src/skills_runner/
 ├── exceptions.py     # Custom exception classes
 ├── models.py         # Data classes (Message, Skill, ScriptExecution)
 ├── llm_client.py     # OpenAI-compatible API client
-├── skills_tool.py    # Four tools: LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT
+├── skills_tool.py    # Four tools: LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT
 ├── tools.py          # ToolDefinition constants (4 tool schemas)
 ├── executor.py       # Subprocess execution (script runner)
 ├── conversation.py   # Conversation loop orchestration
@@ -102,7 +102,7 @@ See [research.md](./research.md) for complete technical decisions.
 4. click CLI framework (decorator-based, mature)
 5. Subprocess execution with MVP simplified security (full filesystem access)
 6. python-dotenv configuration management
-7. READ_FILE_IN_SKILL for rich skill documentation
+7. READ_FILES_IN_SKILL for rich skill documentation
 8. Tool schemas in OpenAI function calling format
 
 ---
@@ -129,7 +129,7 @@ See [contracts/](./contracts/) for complete contract specifications.
 **Tools**:
 - **list_skills**: Scan skills folder, return skill names
 - **get_skill**: Read SKILL.MD for a skill (table of contents)
-- **read_file_in_skill**: Read any file within skill folder (e.g., examples, docs)
+- **read_files_in_skill**: Read one or more files within skill folder (e.g., examples, docs)
 - **run_python_script**: Execute Python in skill's venv with full filesystem access
 
 ### Quickstart Guide
@@ -151,13 +151,13 @@ GitHub Copilot context updated: `.github/agents/copilot-instructions.md`
 *GATE: Re-check constitution compliance after design*
 
 **I. Separation of Concerns** - ✅ PASS  
-Design maintains clear separation: 4 distinct tools (LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL, RUN_PYTHON_SCRIPT), separate modules (config, llm_client, skills_tool, executor, conversation, cli). No overlapping responsibilities.
+Design maintains clear separation: 4 distinct tools (LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL, RUN_PYTHON_SCRIPT), separate modules (config, llm_client, skills_tool, executor, conversation, cli). No overlapping responsibilities.
 
 **II. Modularization** - ✅ PASS  
 Design produces 7 independently testable modules with clear interfaces. CLI wraps library functions. Each tool operates independently. Contract tests validate module boundaries.
 
 **III. Code Simplicity** - ✅ PASS  
-Design adheres to KISS/YAGNI: READ_FILE_IN_SKILL is simple file read with path validation. Simplified security model (full filesystem access) reduces MVP complexity. No premature optimization or unnecessary abstractions.
+Design adheres to KISS/YAGNI: READ_FILES_IN_SKILL is simple file read with path validation. Simplified security model (full filesystem access) reduces MVP complexity. No premature optimization or unnecessary abstractions.
 
 **IV. Code Quality** - ✅ PASS  
 Design specifies Python 3.9+ type hints, pytest testing, clear error messages. Contracts define expected quality standards (input validation, error handling).
@@ -169,7 +169,7 @@ Design includes 4 contract specifications with test scenarios (35+ test cases ac
 Design ensures consistent tool execution pattern with user visibility (FR-044). All tools follow same OpenAI format. Error messages standardized across contracts.
 
 **VII. Performance Requirements** - ✅ PASS  
-Design specifies quantifiable targets: LIST_SKILLS <1s, GET_SKILL <500ms, READ_FILE_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s, 30s timeout. All achievable with proposed implementation.
+Design specifies quantifiable targets: LIST_SKILLS <1s, GET_SKILL <500ms, READ_FILES_IN_SKILL <500ms, RUN_PYTHON_SCRIPT <5s, 30s timeout. All achievable with proposed implementation.
 
 **Conclusion**: All constitution principles remain PASSED after Phase 1 design. No violations introduced. Design is ready for Phase 2 (task breakdown).
 

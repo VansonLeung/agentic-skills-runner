@@ -84,13 +84,13 @@
 
 **Goal**: LLM can autonomously discover skills, read SKILL.MD, and read additional files within skills. All tool calls visible to user.
 
-**Independent Test**: Create skills folder with subfolders containing SKILL.MD and additional files, start conversation, verify LLM calls LIST_SKILLS, GET_SKILL, READ_FILE_IN_SKILL with results displayed
+**Independent Test**: Create skills folder with subfolders containing SKILL.MD and additional files, start conversation, verify LLM calls LIST_SKILLS, GET_SKILL, READ_FILES_IN_SKILL with results displayed
 
 ### Contract Tests for User Story 2
 
 - [x] T023 [P] [US2] Create contract test for LIST_SKILLS in tests/contract/test_list_skills.py
 - [x] T024 [P] [US2] Create contract test for GET_SKILL in tests/contract/test_get_skill.py
-- [x] T025 [P] [US2] Create contract test for READ_FILE_IN_SKILL in tests/contract/test_read_file_in_skill.py
+- [x] T025 [P] [US2] Create contract test for READ_FILES_IN_SKILL in tests/contract/test_read_files_in_skill.py
 - [x] T026 [P] [US2] Create integration test for skills discovery flow in tests/integration/test_skills_discovery.py
 
 ### Implementation for User Story 2
@@ -98,8 +98,8 @@
 - [x] T027 [P] [US2] Implement Skill class in src/skills_runner/models.py (name, folder_path, documentation_path, venv_path)
 - [x] T028 [P] [US2] Implement list_skills function in src/skills_runner/skills_tool.py (scan skills folder, return skill names)
 - [x] T029 [P] [US2] Implement get_skill function in src/skills_runner/skills_tool.py (read SKILL.MD for specified skill)
-- [x] T030 [P] [US2] Implement read_file_in_skill function in src/skills_runner/skills_tool.py (read file with path traversal protection)
-- [x] T031 [US2] Create ToolDefinition constants in src/skills_runner/tools.py (4 tool schemas: list_skills, get_skill, read_file_in_skill, run_python_script)
+- [x] T030 [P] [US2] Implement read_files_in_skill function in src/skills_runner/skills_tool.py (read files with path traversal protection)
+- [x] T031 [US2] Create ToolDefinition constants in src/skills_runner/tools.py (4 tool schemas: list_skills, get_skill, read_files_in_skill, run_python_script)
 - [x] T032 [US2] Integrate tools with Conversation class in src/skills_runner/conversation.py (register tools, execute tool calls, return results)
 - [x] T033 [US2] Add tool execution visibility in src/skills_runner/conversation.py (display tool calls and results to user)
 - [x] T034 [US2] Add skill name validation in src/skills_runner/skills_tool.py (reject /, \, .. characters)
@@ -107,7 +107,7 @@
 - [x] T036 [P] [US2] Create unit tests for Skill model in tests/unit/test_models.py
 - [x] T037 [P] [US2] Create unit tests for list_skills in tests/unit/test_skills_tool.py
 - [x] T038 [P] [US2] Create unit tests for get_skill in tests/unit/test_skills_tool.py
-- [x] T039 [P] [US2] Create unit tests for read_file_in_skill in tests/unit/test_skills_tool.py
+- [x] T039 [P] [US2] Create unit tests for read_files_in_skill in tests/unit/test_skills_tool.py
 
 **Checkpoint**: User Story 2 complete - LLM can discover and read skills autonomously
 
@@ -154,7 +154,7 @@
 - [x] T058 Add type hints validation across all modules (mypy --strict compatibility)
 - [x] T059 Add docstrings to all public APIs (classes, functions, modules)
 - [x] T060 Run quickstart.md validation per quickstart guide test scenarios
-- [x] T061 [P] Add performance logging for tool operations (list_skills, get_skill, read_file_in_skill, run_python_script)
+- [x] T061 [P] Add performance logging for tool operations (list_skills, get_skill, read_files_in_skill, run_python_script)
 - [x] T062 [P] Create CONTRIBUTING.md with development setup and testing guidelines
 - [x] T063 Code cleanup and refactoring (remove dead code, improve naming)
 - [x] T064 Performance optimization if targets not met (SC-004, SC-005, SC-006) - Not needed: All performance targets met
@@ -229,13 +229,13 @@ Phase 6 (Polish) ← After all desired user stories complete
 # Developer 1: Contract tests (can write before implementation exists)
 - T023 [P] [US2] Contract test for LIST_SKILLS
 - T024 [P] [US2] Contract test for GET_SKILL
-- T025 [P] [US2] Contract test for READ_FILE_IN_SKILL
+- T025 [P] [US2] Contract test for READ_FILES_IN_SKILL
 
 # Developer 2: Core implementation (3 independent tool functions)
 - T027 [P] [US2] Skill model
 - T028 [P] [US2] list_skills function
 - T029 [P] [US2] get_skill function
-- T030 [P] [US2] read_file_in_skill function
+- T030 [P] [US2] read_files_in_skill function
 
 # Developer 3: Integration and validation
 - T026 [P] [US2] Integration test

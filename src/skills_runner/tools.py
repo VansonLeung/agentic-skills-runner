@@ -25,11 +25,14 @@ GET_SKILL_DEF = {
     },
 }
 
-READ_FILE_IN_SKILL_DEF = {
+READ_FILES_IN_SKILL_DEF = {
     "type": "function",
     "function": {
-        "name": "read_file_in_skill",
-        "description": "Read any file within a skill's folder. Use this when SKILL.MD references additional files.",
+        "name": "read_files_in_skill",
+        "description": (
+            "Read one or more files within a skill's folder. Use this when SKILL.MD references "
+            "additional files. Pass file_paths as a list of relative paths."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
@@ -37,12 +40,13 @@ READ_FILE_IN_SKILL_DEF = {
                     "type": "string",
                     "description": "Name of the skill (folder name)",
                 },
-                "file_path": {
-                    "type": "string",
-                    "description": "Relative path within skill (e.g., 'examples/usage.py')",
+                "file_paths": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Relative paths within skill (e.g., ['examples/usage.py', 'docs/api.md'])",
                 },
             },
-            "required": ["skill_name", "file_path"],
+            "required": ["skill_name", "file_paths"],
         },
     },
 }
@@ -128,4 +132,4 @@ CREATE_SKILL_DEF = {
     },
 }
 
-SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILE_IN_SKILL_DEF, WRITE_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]
+SKILLS_TOOLS = [LIST_SKILLS_DEF, GET_SKILL_DEF, READ_FILES_IN_SKILL_DEF, WRITE_FILE_IN_SKILL_DEF, RUN_PYTHON_SCRIPT_DEF, CREATE_SKILL_DEF]

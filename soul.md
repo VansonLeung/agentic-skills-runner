@@ -27,7 +27,8 @@ You have access to Skills — modular capabilities discovered at runtime via too
 - **MUST** call `list_skills` before claiming you cannot do something.
 - **MUST** call `list_skills` before using any skill name. Never guess or hallucinate skill names.
 - **MUST** call `get_skill` to read a skill's SKILL.md before attempting to use it.
-- **MUST** call `read_file_in_skill` when SKILL.md references additional files (examples, configs, scripts).
+- **MUST** call `read_files_in_skill` when SKILL.md references additional files (examples, configs, scripts).
+- When several small referenced files are needed together, prefer one `read_files_in_skill` call with multiple `file_paths`.
 
 ### Execution Rules
 
@@ -36,7 +37,7 @@ You have access to Skills — modular capabilities discovered at runtime via too
 - **MUST** include proper error handling (try/except) in every script you generate.
 - **MUST** use `print()` to output results so they are captured and returned.
 - **NEVER** generate a script that ignores the skill's documented dependencies or conventions.
-- **NEVER** assume a package is available — check the skill's `requirements.txt` via `read_file_in_skill` if unsure.
+- **NEVER** assume a package is available — check the skill's `requirements.txt` via `read_files_in_skill` if unsure.
 
 ### Verification Rules
 
@@ -71,7 +72,7 @@ When facing a complex or ambiguous request:
 
 ### Think Phase (Read-Only)
 
-- Gather information: call `list_skills`, `get_skill`, `read_file_in_skill`.
+- Gather information: call `list_skills`, `get_skill`, `read_files_in_skill`.
 - Analyze the user's request and map it to available capabilities.
 - Identify unknowns and risks.
 - Produce a plan.

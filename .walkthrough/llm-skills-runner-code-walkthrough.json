@@ -1,0 +1,117 @@
+{
+  "title": "LLM Skills Runner Code Walkthrough",
+  "description": "Explore the architecture and execution flow of the LLM Skills Runner toolkit that enables LLMs to execute skills with Python code.",
+  "commitSha": "8d09a82f17eb99e53040bbeb7e50189495e93840",
+  "steps": [
+    {
+      "file": "src/skills_runner/__main__.py",
+      "lines": [
+        1,
+        6
+      ],
+      "symbol": "main",
+      "contentHash": "c2ee4ddb093c",
+      "subtitle": "This file serves as the entry point for the CLI application. It imports and runs the main CLI function, making the skills runner executable from the command line.",
+      "duration": 2
+    },
+    {
+      "file": "src/skills_runner/cli.py",
+      "lines": [
+        16,
+        42
+      ],
+      "symbol": "chat",
+      "contentHash": "fa56923f23bb",
+      "subtitle": "The CLI chat command initializes the configuration from environment variables, creates an LLM client and conversation instance, then either processes a single prompt or enters interactive mode. It demonstrates the core workflow of the skills runner.",
+      "duration": 8
+    },
+    {
+      "file": "src/skills_runner/conversation.py",
+      "lines": [
+        13,
+        29
+      ],
+      "symbol": "Conversation",
+      "contentHash": "f093407a1155",
+      "subtitle": "The Conversation class manages chat history and tool execution. It initializes with an LLM client, tools list, and skills folder path, setting up a system message that guides the LLM to use the list_skills tool first.",
+      "duration": 5
+    },
+    {
+      "file": "src/skills_runner/conversation.py",
+      "lines": [
+        72,
+        109
+      ],
+      "symbol": "run",
+      "contentHash": "f912b9483a86",
+      "subtitle": "This method runs a conversation turn by sending messages to the LLM, processing tool calls if present, executing them via _execute_tool, and appending results back to the conversation history. It loops until a final assistant response is returned.",
+      "duration": 10
+    },
+    {
+      "file": "src/skills_runner/conversation.py",
+      "lines": [
+        115,
+        144
+      ],
+      "symbol": "_execute_tool",
+      "contentHash": "c99348f675c9",
+      "subtitle": "This method dispatches tool calls to their respective handlers. It supports list_skills, get_skill, read_files_in_skill, and run_python_script tools by delegating to skill-specific functions in skills_tool.py. It handles JSON parsing errors and unknown tools gracefully.",
+      "duration": 10
+    },
+    {
+      "file": "src/skills_runner/llm_client.py",
+      "lines": [
+        17,
+        57
+      ],
+      "symbol": "chat",
+      "contentHash": "04eb8c043b5b",
+      "subtitle": "The LLMClient class handles communication with OpenAI-compatible LLM APIs. It sends chat completion requests with messages and tools, processes the response, and raises errors for API failures or invalid responses.",
+      "duration": 8
+    },
+    {
+      "file": "src/skills_runner/tools.py",
+      "lines": [
+        72,
+        72
+      ],
+      "symbol": "SKILLS_TOOLS",
+      "contentHash": "568dc58517bf",
+      "subtitle": "This constant defines the list of available tools that can be called by the LLM. It includes four core tools: list_skills, get_skill, read_files_in_skill, and run_python_script that enable skill discovery and execution.",
+      "duration": 3
+    },
+    {
+      "file": "src/skills_runner/skills_tool.py",
+      "lines": [
+        25,
+        44
+      ],
+      "symbol": "list_skills",
+      "contentHash": "964ab2729a9e",
+      "subtitle": "The list_skills function scans the configured skills folder and returns a list of valid skill directories. It validates skill names to prevent directory traversal attacks and logs execution duration for performance monitoring.",
+      "duration": 8
+    },
+    {
+      "file": "src/skills_runner/skills_tool.py",
+      "lines": [
+        81,
+        143
+      ],
+      "symbol": "read_files_in_skill",
+      "contentHash": "ded20f4b5c21",
+      "subtitle": "This function safely reads files within a skill's directory by validating the file path to prevent directory traversal. It returns file content, size, and encoding information while handling various error conditions.",
+      "duration": 10
+    },
+    {
+      "file": "src/skills_runner/skills_tool.py",
+      "lines": [
+        146,
+        185
+      ],
+      "symbol": "run_python_script",
+      "contentHash": "84064bfeb7a7",
+      "subtitle": "The run_python_script function executes Python code in a skill's virtual environment. It finds the appropriate Python executable, runs the script with timeout protection, and returns stdout/stderr results or error information.",
+      "duration": 10
+    }
+  ]
+}
